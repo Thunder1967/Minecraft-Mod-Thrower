@@ -25,13 +25,6 @@ public class GlovesThrowHandler {
             event.setCanceled(true);
         }
     }
-//    @SubscribeEvent
-//    public static void onRightClickBlock(PlayerInteractEvent.RightClickBlock event) {
-//        if(handleThrow(event.getEntity(),event.getLevel(),event.getItemStack())){
-//            event.setCancellationResult(InteractionResult.SUCCESS);
-//            event.setCanceled(true);
-//        }
-//    }
 
     private static boolean handleThrow(Player player,Level level,ItemStack stack){
         if (stack.isEmpty() || stack.is(ModTags.Items.CanNotThrowByGloves)) return false;
@@ -39,8 +32,18 @@ public class GlovesThrowHandler {
             ThrowTnt(player, level, 1);
         } else if (stack.getItem() instanceof SpawnEggItem) {
             ThrowItem(player,level,stack,1,FlyingItem.run.SPAWN_FROM_SPAWN_EGG);
+        } else if (stack.is(Items.BUCKET)) {
+            ThrowItem(player, level, stack, 1, FlyingItem.run.BUCKET_COLLECT_LIQUID);
         } else if (stack.getItem() instanceof BucketItem) {
             ThrowItem(player,level,stack,1,FlyingItem.run.PUT_LIQUID);
+            if (!player.getAbilities().instabuild) {
+                ItemStack emptyBucket = new ItemStack(Items.BUCKET);
+                if (!player.getInventory().add(emptyBucket)) {
+                    player.drop(emptyBucket, false);
+                }
+            }
+        } else if(stack.getItem() instanceof DiggerItem){
+            ThrowItem(player,level,stack,1,FlyingItem.run.TOOL_BREAK_BLOCK);
         } else if(stack.getItem() instanceof BlockItem blockItem){
             ThrowBlock(player, level, blockItem.getBlock(), 1);
         }

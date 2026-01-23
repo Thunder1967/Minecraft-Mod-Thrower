@@ -2,20 +2,29 @@ package me.thunder.thrower.entity;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.ThrowableItemProjectile;
 import net.minecraft.world.item.*;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.BucketPickup;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
 public class FlyingItem extends ThrowableItemProjectile {
     public enum run{
         SPAWN_FROM_SPAWN_EGG,
-        PUT_LIQUID
+        PUT_LIQUID,
+        TOOL_BREAK_BLOCK,
+        BUCKET_COLLECT_LIQUID
     }
     private run whatToDo;
     public FlyingItem(EntityType<? extends FlyingItem> type, Level level) {
@@ -42,6 +51,12 @@ public class FlyingItem extends ThrowableItemProjectile {
                     break;
                 case PUT_LIQUID:
                     runPutLiquid(result);
+                    break;
+                case TOOL_BREAK_BLOCK:
+                    runBreakBlock(result);
+                    break;
+                case BUCKET_COLLECT_LIQUID:
+                    runCollectLiquid(result);
                     break;
                 default:
                     runSpawnItemEntity();
@@ -82,14 +97,60 @@ public class FlyingItem extends ThrowableItemProjectile {
     private void runPutLiquid(HitResult result){
         ItemStack stack = this.getItem();
         Player player = this.getOwner() instanceof Player p ? p : null;
-        if(stack.getItem() instanceof BucketItem bucketItem && result instanceof BlockHitResult blockHit){
-            BlockPos targetPos = blockHit.getBlockPos().relative(blockHit.getDirection());
-            bucketItem.emptyContents(player, this.level(), targetPos, blockHit);
-            this.spawnAtLocation(Items.BUCKET);
+        if(stack.getItem() instanceof BucketItem bucketItem){
+            if(result instanceof BlockHitResult blockHit){
+                BlockPos targetPos = blockHit.getBlockPos().relative(blockHit.getDirection());
+                bucketItem.emptyContents(player, this.level(), targetPos, blockHit);
+            }
+            else if(result instanceof EntityHitResult entityHitResult){
+                BlockPos targetPos = entityHitResult.getEntity().blockPosition();
+                bucketItem.emptyContents(player, this.level(), targetPos, null);
+            }
         }
         else{
             runSpawnItemEntity();
         }
+    }
+
+    private void runBreakBlock(HitResult result) {
+        if(result instanceof BlockHitResult blockHitResult && this.level() instanceof ServerLevel serverLevel){
+            BlockPos pos = blockHitResult.getBlockPos();
+            BlockState state = this.level().getBlockState(pos);
+            ItemStack tool = this.getItem();
+            Player player = this.getOwner() instanceof Player p ? p : null;
+            if (tool.isCorrectToolForDrops(state)) {
+                serverLevel.destroyBlock(pos, !player.getAbilities().instabuild, player);
+                //consume durability
+                if (player != null && !player.getAbilities().instabuild) {
+                    tool.hurtAndBreak(1, serverLevel, player, (item) -> {});
+                }
+                //generate visual effect
+                serverLevel.levelEvent(2001, pos, Block.getId(state));
+            }
+            if(!player.getAbilities().instabuild) runSpawnItemEntity();
+        }
+    }
+
+    private void runCollectLiquid(HitResult result){
+        Player player = this.getOwner() instanceof Player p ? p : null;
+        // get center of hitpoint
+        BlockPos centerPos = BlockPos.containing(result.getLocation());
+        // search liquid
+        for (BlockPos targetPos : BlockPos.betweenClosed(centerPos.offset(-1, -1, -1), centerPos.offset(1, 1, 1))) {
+            BlockState state = this.level().getBlockState(targetPos);
+
+            // check the block is liquid or not
+            if (state.getBlock() instanceof BucketPickup pickup) {
+                ItemStack filledBucket = pickup.pickupBlock(player, this.level(), targetPos, state);
+                // after success
+                if (!filledBucket.isEmpty()) {
+                    this.level().playSound(null, targetPos, SoundEvents.BUCKET_FILL, SoundSource.BLOCKS, 1.0F, 1.0F);
+                    if(!player.getAbilities().instabuild) this.spawnAtLocation(filledBucket);
+                    return;
+                }
+            }
+        }
+        runSpawnItemEntity();
     }
 
     private void runSpawnItemEntity(){

@@ -32,7 +32,7 @@ public class FlyingItem extends ThrowableItemProjectile {
     }
 
     public FlyingItem(LivingEntity owner, Level level, ItemStack item, run whatToDo) {
-        super(ModEntities.THROWN_SPAWN_EGG.get(), owner, level);
+        super(ModEntities.FLYING_ITEM.get(), owner, level);
         this.setItem(item);
         this.whatToDo = whatToDo;
     }
@@ -41,6 +41,29 @@ public class FlyingItem extends ThrowableItemProjectile {
         return Items.PAPER;
     }
 
+    @Override
+    public void tick(){
+        super.tick();
+        // empty bucket collect liquid
+        // check whether hit liquid
+        if (whatToDo==run.BUCKET_COLLECT_LIQUID && !this.level().isClientSide && this.tickCount > 1) {
+            BlockPos pos = this.blockPosition();
+            BlockState state = this.level().getBlockState(pos);
+            //in liquid
+            if (!state.getFluidState().isEmpty()) {
+                Player player = this.getOwner() instanceof Player p ? p : null;
+                if (state.getBlock() instanceof BucketPickup pickup) {
+                    ItemStack filledBucket = pickup.pickupBlock(player, this.level(), pos, state);
+                    // after success
+                    if (!filledBucket.isEmpty()) {
+                        this.level().playSound(null, pos, SoundEvents.BUCKET_FILL, SoundSource.BLOCKS, 1.0F, 1.0F);
+                        if(!player.getAbilities().instabuild) this.spawnAtLocation(filledBucket);
+                        this.discard();
+                    }
+                }
+            }
+        }
+    }
     @Override
     protected void onHit(HitResult result) {
         super.onHit(result);

@@ -14,10 +14,14 @@ import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.BucketPickup;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.loot.LootParams;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
+
+import java.util.List;
 
 public class FlyingItem extends ThrowableItemProjectile {
     public enum run{
@@ -142,12 +146,25 @@ public class FlyingItem extends ThrowableItemProjectile {
             ItemStack tool = this.getItem();
             Player player = this.getOwner() instanceof Player p ? p : null;
             if (tool.isCorrectToolForDrops(state)) {
-                serverLevel.destroyBlock(pos, !player.getAbilities().instabuild, player);
-                //consume durability
-                if (player != null && !player.getAbilities().instabuild) {
-                    tool.hurtAndBreak(1, serverLevel, player, (item) -> {});
+                LootParams.Builder builder = new LootParams.Builder(serverLevel)
+                        .withParameter(LootContextParams.ORIGIN, Vec3.atCenterOf(pos))
+                        .withParameter(LootContextParams.TOOL, tool) // 關鍵：帶入工具
+                        .withOptionalParameter(LootContextParams.THIS_ENTITY, player)
+                        .withOptionalParameter(LootContextParams.BLOCK_ENTITY, serverLevel.getBlockEntity(pos));
+
+                List<ItemStack> drops = state.getDrops(builder);
+
+                serverLevel.destroyBlock(pos, false, player);
+                if(!player.getAbilities().instabuild){
+                    // generate drops
+                    for (ItemStack drop : drops) {
+                        Block.popResource(serverLevel, pos, drop);
+                    }
                 }
-                //generate visual effect
+
+                // handle durability
+                tool.hurtAndBreak(1, serverLevel, player, (p) -> {});
+                // launch block breaking effect
                 serverLevel.levelEvent(2001, pos, Block.getId(state));
             }
             if(!player.getAbilities().instabuild) runSpawnItemEntity();

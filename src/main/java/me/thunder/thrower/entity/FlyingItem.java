@@ -2,7 +2,6 @@ package me.thunder.thrower.entity;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.*;
@@ -11,23 +10,17 @@ import net.minecraft.world.entity.projectile.ThrowableItemProjectile;
 import net.minecraft.world.item.*;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.BucketPickup;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.storage.loot.LootParams;
-import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
-import java.util.List;
-
 public class FlyingItem extends ThrowableItemProjectile {
     public enum run{
         SPAWN_FROM_SPAWN_EGG,
         PUT_LIQUID,
-        TOOL_BREAK_BLOCK,
         BUCKET_COLLECT_LIQUID
     }
     private run whatToDo;
@@ -78,9 +71,6 @@ public class FlyingItem extends ThrowableItemProjectile {
                     break;
                 case PUT_LIQUID:
                     runPutLiquid(result);
-                    break;
-                case TOOL_BREAK_BLOCK:
-                    runBreakBlock(result);
                     break;
                 case BUCKET_COLLECT_LIQUID:
                     runCollectLiquid(result);
@@ -139,38 +129,6 @@ public class FlyingItem extends ThrowableItemProjectile {
         }
     }
 
-    private void runBreakBlock(HitResult result) {
-        if(result instanceof BlockHitResult blockHitResult && this.level() instanceof ServerLevel serverLevel){
-            BlockPos pos = blockHitResult.getBlockPos();
-            BlockState state = this.level().getBlockState(pos);
-            ItemStack tool = this.getItem();
-            Player player = this.getOwner() instanceof Player p ? p : null;
-            if (tool.isCorrectToolForDrops(state)) {
-                LootParams.Builder builder = new LootParams.Builder(serverLevel)
-                        .withParameter(LootContextParams.ORIGIN, Vec3.atCenterOf(pos))
-                        .withParameter(LootContextParams.TOOL, tool) // 關鍵：帶入工具
-                        .withOptionalParameter(LootContextParams.THIS_ENTITY, player)
-                        .withOptionalParameter(LootContextParams.BLOCK_ENTITY, serverLevel.getBlockEntity(pos));
-
-                List<ItemStack> drops = state.getDrops(builder);
-
-                serverLevel.destroyBlock(pos, false, player);
-                if(!player.getAbilities().instabuild){
-                    // generate drops
-                    for (ItemStack drop : drops) {
-                        Block.popResource(serverLevel, pos, drop);
-                    }
-                }
-
-                // handle durability
-                tool.hurtAndBreak(1, serverLevel, player, (p) -> {});
-                // launch block breaking effect
-                serverLevel.levelEvent(2001, pos, Block.getId(state));
-            }
-            if(!player.getAbilities().instabuild) runSpawnItemEntity();
-        }
-    }
-
     private void runCollectLiquid(HitResult result){
         Player player = this.getOwner() instanceof Player p ? p : null;
         // get center of hitpoint
@@ -195,10 +153,5 @@ public class FlyingItem extends ThrowableItemProjectile {
 
     private void runSpawnItemEntity(){
         this.spawnAtLocation(this.getItem());
-    }
-
-    public ItemStack getItemStackSnapshot() {
-        ItemStack stack = this.getItem();
-        return stack.isEmpty() ? new ItemStack(this.getDefaultItem()) : stack;
     }
 }

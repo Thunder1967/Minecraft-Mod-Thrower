@@ -1,7 +1,9 @@
 package me.thunder.thrower.EventBus;
 
+import me.thunder.thrower.Thrower;
 import me.thunder.thrower.entity.FlyingBlock;
 import me.thunder.thrower.entity.FlyingItem;
+import me.thunder.thrower.entity.FlyingTool;
 import me.thunder.thrower.util.ModTags;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -43,7 +45,7 @@ public class GlovesThrowHandler {
                 }
             }
         } else if(stack.getItem() instanceof DiggerItem){
-            ThrowItem(player,level,stack,1,FlyingItem.run.TOOL_BREAK_BLOCK);
+            ThrowTool(player,level,stack,1);
         } else if(stack.getItem() instanceof BlockItem blockItem){
             ThrowBlock(player, level, blockItem.getBlock(), 1);
         }
@@ -127,6 +129,28 @@ public class GlovesThrowHandler {
             Vec3 lookAngle = player.getLookAngle();
             thrownEntity.setDeltaMovement(lookAngle.x*speed, lookAngle.y*speed+0.1, lookAngle.z*speed);
             level.addFreshEntity(thrownEntity);
+        }
+    }
+
+    private static void ThrowTool(Player player, Level level, ItemStack stack, double speed){
+        level.playSound(
+                player,
+                player.getX(), player.getY(), player.getZ(),
+                SoundEvents.SNOWBALL_THROW,
+                SoundSource.PLAYERS,
+                0.5F, 0.4F / (level.getRandom().nextFloat() * 0.4F + 0.8F)
+        );
+        if(!level.isClientSide){
+            ItemStack stackCopy = stack.copy();
+            stackCopy.setCount(1);
+            FlyingTool thrownEntity = new FlyingTool(player,level,stackCopy);
+
+            Vec3 lookAngle = player.getLookAngle();
+            thrownEntity.setDeltaMovement(lookAngle.x*speed, lookAngle.y*speed+0.1, lookAngle.z*speed);
+            level.addFreshEntity(thrownEntity);
+            if (player.getAbilities().instabuild) {
+                stack.shrink(1);
+            }
         }
     }
 }

@@ -4,6 +4,7 @@ import com.mojang.logging.LogUtils;
 import me.thunder.thrower.EventBus.GlovesThrowHandler;
 import me.thunder.thrower.entity.ModEntities;
 import me.thunder.thrower.entity.client.FlyingBlockRenderer;
+import me.thunder.thrower.entity.client.FlyingToolRenderer;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -71,6 +72,7 @@ public class Thrower {
         public static void onEntityRenderers(EntityRenderersEvent.RegisterRenderers event) {
             event.registerEntityRenderer(ModEntities.FLYING_ITEM.get(), ThrownItemRenderer::new);
             event.registerEntityRenderer(ModEntities.FLYING_BLOCK.get(), FlyingBlockRenderer::new);
+            event.registerEntityRenderer(ModEntities.FLYING_TOOL.get(), FlyingToolRenderer::new);
         }
     }
 }

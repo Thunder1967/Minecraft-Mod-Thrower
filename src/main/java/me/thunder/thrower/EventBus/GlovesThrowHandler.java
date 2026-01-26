@@ -1,6 +1,5 @@
 package me.thunder.thrower.EventBus;
 
-import me.thunder.thrower.Thrower;
 import me.thunder.thrower.entity.FlyingBlock;
 import me.thunder.thrower.entity.FlyingItem;
 import me.thunder.thrower.entity.FlyingTool;
@@ -33,20 +32,26 @@ public class GlovesThrowHandler {
         else if (stack.is(Items.TNT)){
             ThrowTnt(player, level, 1);
         } else if (stack.getItem() instanceof SpawnEggItem) {
-            ThrowItem(player,level,stack,1,FlyingItem.run.SPAWN_FROM_SPAWN_EGG);
+            ThrowItem(player,level,stack,1, FlyingItem.Action.SPAWN_FROM_SPAWN_EGG);
         } else if (stack.is(Items.BUCKET)) {
-            ThrowItem(player, level, stack, 1, FlyingItem.run.BUCKET_COLLECT_LIQUID);
+            ThrowItem(player, level, stack, 1, FlyingItem.Action.BUCKET_COLLECT_LIQUID);
         } else if (stack.getItem() instanceof BucketItem) {
-            ThrowItem(player,level,stack,1,FlyingItem.run.PUT_LIQUID);
+            ThrowItem(player,level,stack,1, FlyingItem.Action.PUT_LIQUID);
             if (!player.getAbilities().instabuild) {
                 ItemStack emptyBucket = new ItemStack(Items.BUCKET);
                 if (!player.getInventory().add(emptyBucket)) {
                     player.drop(emptyBucket, false);
                 }
             }
-        } else if(stack.getItem() instanceof DiggerItem){
+        } else if(stack.getItem() instanceof DiggerItem ||
+                stack.getItem() instanceof SwordItem ||
+                stack.getItem() instanceof MaceItem){
             ThrowTool(player,level,stack,1);
-        } else if(stack.getItem() instanceof BlockItem blockItem){
+        }
+//        else if(stack.getItem() instanceof SwordItem){
+//            ThrowSword(player,level,stack,1);
+//        }
+        else if(stack.getItem() instanceof BlockItem blockItem){
             ThrowBlock(player, level, blockItem.getBlock(), 1);
         }
         else{
@@ -113,7 +118,7 @@ public class GlovesThrowHandler {
         }
     }
 
-    private static void ThrowItem(Player player, Level level, ItemStack stack, double speed, FlyingItem.run whatToDo){
+    private static void ThrowItem(Player player, Level level, ItemStack stack, double speed, FlyingItem.Action whatToDo){
         level.playSound(
                 player,
                 player.getX(), player.getY(), player.getZ(),

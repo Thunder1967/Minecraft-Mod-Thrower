@@ -36,6 +36,7 @@ public class ModEntities {
                     .fireImmune()
                     .build("flying_tool"));
 
+
     public static void register(IEventBus eventBus) {
         ENTITY_TYPES.register(eventBus);
     }

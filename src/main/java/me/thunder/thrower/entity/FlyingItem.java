@@ -18,17 +18,18 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
 public class FlyingItem extends ThrowableItemProjectile {
-    public enum run{
+    public enum Action {
         SPAWN_FROM_SPAWN_EGG,
         PUT_LIQUID,
-        BUCKET_COLLECT_LIQUID
+        BUCKET_COLLECT_LIQUID,
+        DEFAULT
     }
-    private run whatToDo;
+    private Action whatToDo = Action.DEFAULT;
     public FlyingItem(EntityType<? extends FlyingItem> type, Level level) {
         super(type, level);
     }
 
-    public FlyingItem(LivingEntity owner, Level level, ItemStack item, run whatToDo) {
+    public FlyingItem(LivingEntity owner, Level level, ItemStack item, Action whatToDo) {
         super(ModEntities.FLYING_ITEM.get(), owner, level);
         this.setItem(item);
         this.whatToDo = whatToDo;
@@ -43,7 +44,7 @@ public class FlyingItem extends ThrowableItemProjectile {
         super.tick();
         // empty bucket collect liquid
         // check whether hit liquid
-        if (whatToDo==run.BUCKET_COLLECT_LIQUID && !this.level().isClientSide && this.tickCount > 1) {
+        if (whatToDo== Action.BUCKET_COLLECT_LIQUID && !this.level().isClientSide && this.tickCount > 1) {
             BlockPos pos = this.blockPosition();
             BlockState state = this.level().getBlockState(pos);
             //in liquid
@@ -66,18 +67,10 @@ public class FlyingItem extends ThrowableItemProjectile {
         super.onHit(result);
         if (!this.level().isClientSide) {
             switch (whatToDo){
-                case SPAWN_FROM_SPAWN_EGG:
-                    runSpawnFromEgg(result);
-                    break;
-                case PUT_LIQUID:
-                    runPutLiquid(result);
-                    break;
-                case BUCKET_COLLECT_LIQUID:
-                    runCollectLiquid(result);
-                    break;
-                default:
-                    runSpawnItemEntity();
-                    break;
+                case SPAWN_FROM_SPAWN_EGG -> runSpawnFromEgg(result);
+                case PUT_LIQUID -> runPutLiquid(result);
+                case BUCKET_COLLECT_LIQUID -> runCollectLiquid(result);
+                default -> runSpawnItemEntity();
             }
         }
         this.discard();

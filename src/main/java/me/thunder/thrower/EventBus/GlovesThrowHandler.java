@@ -31,11 +31,14 @@ public class GlovesThrowHandler {
         if (stack.isEmpty() || stack.is(ModTags.Items.CanNotThrowByGloves)) return false;
         else if (stack.is(Items.TNT)){
             ThrowTnt(player, level, 1);
-        } else if (stack.getItem() instanceof SpawnEggItem) {
+        }
+        else if (stack.getItem() instanceof SpawnEggItem) {
             ThrowItem(player,level,stack,1, FlyingItem.Action.SPAWN_FROM_SPAWN_EGG);
-        } else if (stack.is(Items.BUCKET)) {
+        }
+        else if (stack.is(Items.BUCKET)) {
             ThrowItem(player, level, stack, 1, FlyingItem.Action.BUCKET_COLLECT_LIQUID);
-        } else if (stack.getItem() instanceof BucketItem) {
+        }
+        else if (stack.getItem() instanceof BucketItem) {
             ThrowItem(player,level,stack,1, FlyingItem.Action.PUT_LIQUID);
             if (!player.getAbilities().instabuild) {
                 ItemStack emptyBucket = new ItemStack(Items.BUCKET);
@@ -43,20 +46,25 @@ public class GlovesThrowHandler {
                     player.drop(emptyBucket, false);
                 }
             }
-        } else if(stack.getItem() instanceof DiggerItem ||
+        }
+        else if (stack.is(Items.FIRE_CHARGE)) {
+            ThrowItem(player, level, stack, 1, FlyingItem.Action.THROW_FIARBALL);
+        }
+        else if (stack.is(Items.END_CRYSTAL)) {
+            ThrowItem(player, level, stack, 1, FlyingItem.Action.THROW_END_CRYSTAL);
+        }
+        else if(stack.getItem() instanceof DiggerItem ||
                 stack.getItem() instanceof SwordItem ||
-                stack.getItem() instanceof MaceItem){
+                stack.is(Items.MACE)){
             ThrowTool(player,level,stack,1);
         }
-//        else if(stack.getItem() instanceof SwordItem){
-//            ThrowSword(player,level,stack,1);
-//        }
         else if(stack.getItem() instanceof BlockItem blockItem){
             ThrowBlock(player, level, blockItem.getBlock(), 1);
         }
         else{
             ThrowItemEntity(player,level,stack,1.5);
         }
+
         if (!player.getAbilities().instabuild) {
             stack.shrink(1);
         }
@@ -158,4 +166,6 @@ public class GlovesThrowHandler {
             }
         }
     }
+
+
 }

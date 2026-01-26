@@ -22,6 +22,8 @@ public class FlyingItem extends ThrowableItemProjectile {
         SPAWN_FROM_SPAWN_EGG,
         PUT_LIQUID,
         BUCKET_COLLECT_LIQUID,
+        THROW_FIARBALL,
+        THROW_END_CRYSTAL,
         DEFAULT
     }
     private Action whatToDo = Action.DEFAULT;
@@ -70,6 +72,8 @@ public class FlyingItem extends ThrowableItemProjectile {
                 case SPAWN_FROM_SPAWN_EGG -> runSpawnFromEgg(result);
                 case PUT_LIQUID -> runPutLiquid(result);
                 case BUCKET_COLLECT_LIQUID -> runCollectLiquid(result);
+                case THROW_FIARBALL -> generateExplosion(result,5.0f);
+                case THROW_END_CRYSTAL -> generateExplosion(result,10.0f);
                 default -> runSpawnItemEntity();
             }
         }
@@ -142,6 +146,18 @@ public class FlyingItem extends ThrowableItemProjectile {
             }
         }
         runSpawnItemEntity();
+    }
+
+    private void generateExplosion(HitResult result, float power){
+        this.level().explode(
+                this,
+                this.damageSources().explosion(this, this.getOwner()),
+                null,
+                this.getX(), this.getY(), this.getZ(),
+                power,
+                true,
+                Level.ExplosionInteraction.BLOCK
+        );
     }
 
     private void runSpawnItemEntity(){

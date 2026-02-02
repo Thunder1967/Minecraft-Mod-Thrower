@@ -5,6 +5,8 @@ import me.thunder.thrower.EventBus.GlovesThrowHandler;
 import me.thunder.thrower.entity.ModEntities;
 import me.thunder.thrower.entity.client.FlyingBlockRenderer;
 import me.thunder.thrower.entity.client.FlyingToolRenderer;
+import me.thunder.thrower.entity.client.MobNetEntityRenderer;
+import me.thunder.thrower.item.ModItems;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -48,6 +50,8 @@ public class Thrower {
         //custom
         NeoForge.EVENT_BUS.register(GlovesThrowHandler.class);
         ModEntities.register(modEventBus);
+        ModItems.register(modEventBus);
+        ModDataComponents.register(modEventBus);
     }
 
     private void commonSetup(final FMLCommonSetupEvent event) {
@@ -73,6 +77,7 @@ public class Thrower {
             event.registerEntityRenderer(ModEntities.FLYING_ITEM.get(), ThrownItemRenderer::new);
             event.registerEntityRenderer(ModEntities.FLYING_BLOCK.get(), FlyingBlockRenderer::new);
             event.registerEntityRenderer(ModEntities.FLYING_TOOL.get(), FlyingToolRenderer::new);
+            event.registerEntityRenderer(ModEntities.MOB_NET_ENTITY.get(), MobNetEntityRenderer::new);
         }
     }
 }

@@ -3,6 +3,9 @@ package me.thunder.thrower.EventBus;
 import me.thunder.thrower.entity.FlyingBlock;
 import me.thunder.thrower.entity.FlyingItem;
 import me.thunder.thrower.entity.FlyingTool;
+import me.thunder.thrower.entity.MobNetEntity;
+import me.thunder.thrower.item.MobNetItem;
+import me.thunder.thrower.item.ModItems;
 import me.thunder.thrower.util.ModTags;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -27,19 +30,20 @@ public class GlovesThrowHandler {
         }
     }
 
-    private static boolean handleThrow(Player player,Level level,ItemStack stack){
-        if (stack.isEmpty() || stack.is(ModTags.Items.CanNotThrowByGloves)) return false;
-        else if (stack.is(Items.TNT)){
+    private static boolean handleThrow(Player player,Level level,ItemStack item){
+//        System.out.println(item.getItem().getClass());
+        if (item.isEmpty() || item.is(ModTags.Items.CanNotThrowByGloves)) return false;
+        else if (item.is(Items.TNT)){
             ThrowTnt(player, level, 1);
         }
-        else if (stack.getItem() instanceof SpawnEggItem) {
-            ThrowItem(player,level,stack,1, FlyingItem.Action.SPAWN_FROM_SPAWN_EGG);
+        else if (item.getItem() instanceof SpawnEggItem) {
+            ThrowItem(player,level,item,1, FlyingItem.Action.SPAWN_FROM_SPAWN_EGG);
         }
-        else if (stack.is(Items.BUCKET)) {
-            ThrowItem(player, level, stack, 1, FlyingItem.Action.BUCKET_COLLECT_LIQUID);
+        else if (item.is(Items.BUCKET)) {
+            ThrowItem(player, level, item, 1, FlyingItem.Action.BUCKET_COLLECT_LIQUID);
         }
-        else if (stack.getItem() instanceof BucketItem) {
-            ThrowItem(player,level,stack,1, FlyingItem.Action.PUT_LIQUID);
+        else if (item.getItem() instanceof BucketItem) {
+            ThrowItem(player,level,item,1, FlyingItem.Action.PUT_LIQUID);
             if (!player.getAbilities().instabuild) {
                 ItemStack emptyBucket = new ItemStack(Items.BUCKET);
                 if (!player.getInventory().add(emptyBucket)) {
@@ -47,26 +51,29 @@ public class GlovesThrowHandler {
                 }
             }
         }
-        else if (stack.is(Items.FIRE_CHARGE)) {
-            ThrowItem(player, level, stack, 1, FlyingItem.Action.THROW_FIARBALL);
+        else if (item.is(Items.FIRE_CHARGE)) {
+            ThrowItem(player, level, item, 1, FlyingItem.Action.THROW_FIARBALL);
         }
-        else if (stack.is(Items.END_CRYSTAL)) {
-            ThrowItem(player, level, stack, 1, FlyingItem.Action.THROW_END_CRYSTAL);
+        else if (item.is(Items.END_CRYSTAL)) {
+            ThrowItem(player, level, item, 1, FlyingItem.Action.THROW_END_CRYSTAL);
         }
-        else if(stack.getItem() instanceof DiggerItem ||
-                stack.getItem() instanceof SwordItem ||
-                stack.is(Items.MACE)){
-            ThrowTool(player,level,stack,1);
+        else if(item.getItem() instanceof DiggerItem ||
+                item.getItem() instanceof SwordItem ||
+                item.is(Items.MACE)){
+            ThrowTool(player,level,item,1);
         }
-        else if(stack.getItem() instanceof BlockItem blockItem){
+        else if(item.getItem() instanceof BlockItem blockItem){
             ThrowBlock(player, level, blockItem.getBlock(), 1);
         }
+        else if(item.getItem() instanceof MobNetItem){
+            ThrowNet(player, level, item, 1);
+        }
         else{
-            ThrowItemEntity(player,level,stack,1.5);
+            ThrowItemEntity(player,level,item,1.5);
         }
 
         if (!player.getAbilities().instabuild) {
-            stack.shrink(1);
+            item.shrink(1);
         }
         return true;
     }
@@ -167,5 +174,22 @@ public class GlovesThrowHandler {
         }
     }
 
+    private static void ThrowNet(Player player, Level level, ItemStack stack, double speed){
+        level.playSound(
+                player,
+                player.getX(), player.getY(), player.getZ(),
+                SoundEvents.SNOWBALL_THROW,
+                SoundSource.PLAYERS,
+                0.5F, 0.4F / (level.getRandom().nextFloat() * 0.4F + 0.8F)
+        );
+        if(!level.isClientSide){
+            ItemStack stackCopy = stack.copy();
+            stackCopy.setCount(1);
+            MobNetEntity thrownEntity = new MobNetEntity(player,level,stackCopy);
 
+            Vec3 lookAngle = player.getLookAngle();
+            thrownEntity.setDeltaMovement(lookAngle.x*speed, lookAngle.y*speed+0.1, lookAngle.z*speed);
+            level.addFreshEntity(thrownEntity);
+        }
+    }
 }

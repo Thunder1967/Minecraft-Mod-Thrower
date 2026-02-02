@@ -36,6 +36,14 @@ public class ModEntities {
                     .fireImmune()
                     .build("flying_tool"));
 
+    public static final DeferredHolder<EntityType<?>, EntityType<MobNetEntity>> MOB_NET_ENTITY =
+            ENTITY_TYPES.register("mob_net_entity", () -> EntityType.Builder.<MobNetEntity>of(MobNetEntity::new, MobCategory.MISC)
+                    .sized(0.5F, 0.5F)
+                    .clientTrackingRange(4)
+                    .updateInterval(2)
+                    .fireImmune()
+                    .build("mob_net_entity"));
+
 
     public static void register(IEventBus eventBus) {
         ENTITY_TYPES.register(eventBus);

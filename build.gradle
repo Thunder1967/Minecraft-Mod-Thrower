@@ -99,7 +99,7 @@ sourceSets.main.resources { srcDir 'src/generated/resources' }
 dependencies {
     runtimeOnly "maven.modrinth:jade:15.10.4+neoforge"
     runtimeOnly "maven.modrinth:damagenumbers:1.4.1-neoforge"
-    runtimeOnly "maven.modrinth:just-zoom:2.1.0-1.21.1-neoforge"
+//    runtimeOnly "maven.modrinth:just-zoom:2.1.0-1.21.1-neoforge"
     runtimeOnly "maven.modrinth:konkrete:1.9.9-1.21-neoforge"
     // Example mod dependency with JEI
     // The JEI API is declared for compile time use, while the full JEI artifact is used at runtime

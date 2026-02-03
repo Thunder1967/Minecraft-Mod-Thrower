@@ -17,6 +17,8 @@ public class ModItemModelProvider extends ItemModelProvider {
     protected void registerModels() {
         getBuilder("mob_net")
                 .parent(new ModelFile.UncheckedModelFile("minecraft:builtin/entity"))
-                .texture("particle", modLoc("entity/mob_net.png"));
+                .texture("particle", modLoc("entity/mob_net"));
+
+        basicItem(ModItems.GLOVES.get());
     }
 }

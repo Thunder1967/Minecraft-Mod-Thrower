@@ -5,7 +5,6 @@ import me.thunder.thrower.entity.FlyingItem;
 import me.thunder.thrower.entity.FlyingTool;
 import me.thunder.thrower.entity.MobNetEntity;
 import me.thunder.thrower.item.MobNetItem;
-import me.thunder.thrower.item.ModItems;
 import me.thunder.thrower.util.ModTags;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -21,7 +20,7 @@ import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 
-public class GlovesThrowHandler {
+public class GloveThrowHandler {
     @SubscribeEvent
     public static void onRightClickItem(PlayerInteractEvent.RightClickItem event) {
         if(handleThrow(event.getEntity(),event.getLevel(),event.getItemStack())){

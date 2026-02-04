@@ -72,7 +72,10 @@ public class MobNetEntity extends ThrowableItemProjectile {
                 droppedNet.set(ModDataComponents.CAPTURED_ENTITY.get(), entityData);
 
                 // set the display name of filled net
-                droppedNet.set(DataComponents.CUSTOM_NAME, Component.literal("capture ").append(living.getDisplayName()));
+                droppedNet.set(DataComponents.CUSTOM_NAME,
+                        Component.translatable("mob_net.thrower.fill")
+                                .append(" ")
+                                .append(living.getDisplayName()));
 
                 // gnerater drop
                 this.spawnAtLocation(droppedNet);
@@ -90,6 +93,10 @@ public class MobNetEntity extends ThrowableItemProjectile {
             BlockPos blockPos = result.getBlockPos();
             Vec3 pos = new Vec3(blockPos.getX()+0.5,blockPos.getY()+1,blockPos.getZ()+0.5);
             releaseMob(pos);
+        }
+        else{
+            if(this.getOwner() instanceof Player player &&
+                    !player.getAbilities().instabuild) this.spawnAtLocation(new ItemStack(ModItems.MOB_NET.get()));
         }
     }
 

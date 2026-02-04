@@ -25,16 +25,11 @@ public class MobNetItem extends Item {
     public InteractionResult useOn(UseOnContext context) {
         Level level = context.getLevel();
         ItemStack item = context.getItemInHand();
-        CompoundTag entityData = item.get(ModDataComponents.CAPTURED_ENTITY.get());
         BlockPos blockPos = context.getClickedPos().relative(context.getClickedFace());
         Vec3 spawnPos = new Vec3(blockPos.getX()+0.5,blockPos.getY()+0.5,blockPos.getZ()+0.5);
 
-        if (entityData != null) {
-            // spawn entity
-            if(!level.isClientSide && releaseEntityAndClear(level,spawnPos,item)){
-                return InteractionResult.SUCCESS;
-            }
-            return InteractionResult.sidedSuccess(level.isClientSide);
+        if(!level.isClientSide && releaseEntityAndClear(level,spawnPos,item)){
+            return InteractionResult.SUCCESS;
         }
         return InteractionResult.PASS;
     }

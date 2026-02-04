@@ -59,14 +59,84 @@ public class FlyingTool extends ThrowableItemProjectile {
     protected void onHitBlock(BlockHitResult result) {
         if(getIsReturning()) return;
         super.onHitBlock(result);
-        runBreakBlock(result);
+        if(this.level() instanceof ServerLevel serverLevel){
+            BlockPos pos = result.getBlockPos();
+            BlockState state = this.level().getBlockState(pos);
+            ItemStack tool = this.getItem();
+            Player player = this.getOwner() instanceof Player p ? p : null;
+
+            if (tool.isCorrectToolForDrops(state)) {
+                LootParams.Builder builder = new LootParams.Builder(serverLevel)
+                        .withParameter(LootContextParams.ORIGIN, Vec3.atCenterOf(pos))
+                        .withParameter(LootContextParams.TOOL, tool)
+                        .withOptionalParameter(LootContextParams.THIS_ENTITY, player)
+                        .withOptionalParameter(LootContextParams.BLOCK_ENTITY, serverLevel.getBlockEntity(pos));
+
+                List<ItemStack> drops = state.getDrops(builder);
+
+                serverLevel.destroyBlock(pos, false, player);
+                if(!player.getAbilities().instabuild){
+                    // generate drops
+                    for (ItemStack drop : drops) {
+                        Block.popResource(serverLevel, pos, drop);
+                    }
+                    // handle durability
+                    tool.hurtAndBreak(1, serverLevel, player, (p) -> {});
+                }
+
+                // launch block breaking effect
+                serverLevel.levelEvent(2001, pos, Block.getId(state));
+            }
+        }
     }
 
     @Override
     protected void onHitEntity(EntityHitResult result) {
         if(getIsReturning()) return;
         super.onHitEntity(result);
-        runHitMob(result.getEntity(),this.getOwner());
+        ItemStack item = this.getItem();
+
+        if (this.level() instanceof ServerLevel serverLevel &&
+                this.getOwner() instanceof Player player &&
+                result.getEntity() instanceof LivingEntity livingTarget) {
+
+            DamageSource source = this.damageSources().playerAttack(player);
+            float baseDamage = 1f;
+            // apply effect
+            if (player.hasEffect(MobEffects.DAMAGE_BOOST)) {
+                baseDamage += (player.getEffect(MobEffects.DAMAGE_BOOST).getAmplifier()+1) * 3.0F;
+            }
+
+            // apply item modifiers
+            ItemAttributeModifiers modifiers = item.getOrDefault(DataComponents.ATTRIBUTE_MODIFIERS, ItemAttributeModifiers.EMPTY);
+            for (ItemAttributeModifiers.Entry entry : modifiers.modifiers()) {
+                if (entry.attribute().is(Attributes.ATTACK_DAMAGE)) {
+                    baseDamage += (float) entry.modifier().amount();
+                }
+            }
+
+            // apply Enchantment
+            float finalDamage = EnchantmentHelper.modifyDamage(
+                    serverLevel, item, livingTarget, source, baseDamage);
+
+            // custom special damage calculation
+            if(item.is(Items.MACE)){
+                int densityLevel = EnchantmentHelper.getTagEnchantmentLevel(
+                        serverLevel.registryAccess()
+                                .lookupOrThrow(Registries.ENCHANTMENT)
+                                .getOrThrow(Enchantments.DENSITY),
+                        item
+                );
+                finalDamage += (float) moveDistance/(5-densityLevel);
+            }
+
+            // apply damage
+            if (livingTarget.hurt(source, finalDamage)){
+                EnchantmentHelper.doPostAttackEffectsWithItemSource(
+                        serverLevel, livingTarget, source, item);
+                if(!player.getAbilities().instabuild) item.hurtAndBreak(1, serverLevel, player, (p) -> {});
+            }
+        }
     }
 
     @Override
@@ -127,83 +197,11 @@ public class FlyingTool extends ThrowableItemProjectile {
         builder.define(IS_RETURNING, false);
     }
 
-    private void runBreakBlock(BlockHitResult blockHitResult) {
-        if(this.level() instanceof ServerLevel serverLevel){
-            BlockPos pos = blockHitResult.getBlockPos();
-            BlockState state = this.level().getBlockState(pos);
-            ItemStack tool = this.getItem();
-            Player player = this.getOwner() instanceof Player p ? p : null;
-            if (tool.isCorrectToolForDrops(state)) {
-                LootParams.Builder builder = new LootParams.Builder(serverLevel)
-                        .withParameter(LootContextParams.ORIGIN, Vec3.atCenterOf(pos))
-                        .withParameter(LootContextParams.TOOL, tool)
-                        .withOptionalParameter(LootContextParams.THIS_ENTITY, player)
-                        .withOptionalParameter(LootContextParams.BLOCK_ENTITY, serverLevel.getBlockEntity(pos));
-
-                List<ItemStack> drops = state.getDrops(builder);
-
-                serverLevel.destroyBlock(pos, false, player);
-                if(!player.getAbilities().instabuild){
-                    // generate drops
-                    for (ItemStack drop : drops) {
-                        Block.popResource(serverLevel, pos, drop);
-                    }
-                    // handle durability
-                    tool.hurtAndBreak(1, serverLevel, player, (p) -> {});
-                }
-
-                // launch block breaking effect
-                serverLevel.levelEvent(2001, pos, Block.getId(state));
-            }
-//            if(!player.getAbilities().instabuild) this.spawnAtLocation(this.getItem());;
-        }
-    }
-
     public void setIsReturning(boolean x) {
         this.entityData.set(IS_RETURNING, x);
     }
 
     public boolean getIsReturning() {
         return this.entityData.get(IS_RETURNING);
-    }
-
-    private void runHitMob(Entity target, Entity owner){
-        ItemStack item = this.getItem();
-        if (owner instanceof Player player &&
-                target instanceof LivingEntity livingTarget &&
-                this.level() instanceof ServerLevel serverLevel) {
-
-            DamageSource source = this.damageSources().playerAttack(player);
-            float baseDamage = 1f;
-            if (player.hasEffect(MobEffects.DAMAGE_BOOST)) {
-                baseDamage += (player.getEffect(MobEffects.DAMAGE_BOOST).getAmplifier() + 1) * 3.0F;
-            }
-
-            ItemAttributeModifiers modifiers = item.getOrDefault(DataComponents.ATTRIBUTE_MODIFIERS, ItemAttributeModifiers.EMPTY);
-            for (ItemAttributeModifiers.Entry entry : modifiers.modifiers()) {
-                if (entry.attribute().is(Attributes.ATTACK_DAMAGE)) {
-                    baseDamage += (float) entry.modifier().amount();
-                }
-            }
-            float finalDamage = EnchantmentHelper.modifyDamage(
-                    serverLevel, item, livingTarget, source, baseDamage);
-
-            // custom special damage calculation
-            if(item.is(Items.MACE)){
-                int densityLevel = EnchantmentHelper.getTagEnchantmentLevel(
-                        serverLevel.registryAccess()
-                                .lookupOrThrow(Registries.ENCHANTMENT)
-                                .getOrThrow(Enchantments.DENSITY),
-                        item
-                );
-                finalDamage += (float) moveDistance/(5-densityLevel);
-            }
-
-            if (livingTarget.hurt(source, finalDamage)){
-                EnchantmentHelper.doPostAttackEffectsWithItemSource(
-                        serverLevel, livingTarget, source, item);
-                item.hurtAndBreak(1, serverLevel, player, (p) -> {});
-            }
-        }
     }
 }

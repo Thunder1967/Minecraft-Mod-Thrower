@@ -58,6 +58,7 @@ public class FlyingItem extends ThrowableItemProjectile {
     @Override
     protected void onHit(HitResult result) {
         super.onHit(result);
+        if(this.level().isClientSide) return;
         ItemStack itemStack = this.getItem();
         Item item = itemStack.getItem();
         Player player = this.getOwner() instanceof Player p ? p : null;

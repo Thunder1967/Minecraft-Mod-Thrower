@@ -6,6 +6,7 @@ import me.thunder.thrower.entity.ModEntities;
 import me.thunder.thrower.entity.client.FlyingBlockRenderer;
 import me.thunder.thrower.entity.client.FlyingToolRenderer;
 import me.thunder.thrower.entity.client.MobNetEntityRenderer;
+import me.thunder.thrower.item.ModCreativeModeTabs;
 import me.thunder.thrower.item.ModItems;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
@@ -52,6 +53,7 @@ public class Thrower {
         ModEntities.register(modEventBus);
         ModItems.register(modEventBus);
         ModDataComponents.register(modEventBus);
+        ModCreativeModeTabs.register(modEventBus);
     }
 
     private void commonSetup(final FMLCommonSetupEvent event) {

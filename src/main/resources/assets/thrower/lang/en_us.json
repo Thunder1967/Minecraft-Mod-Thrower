@@ -1,5 +1,6 @@
 {
-  "itemGroup.thrower": "Example Mod Tab",
-  "block.thrower.example_block": "Example Block",
-  "item.thrower.example_item": "Example Item"
+  "item.thrower.mob_net": "empty capture net",
+  "mob_net.thrower.fill": "include",
+  "item.thrower.gloves": "gloves",
+  "creativetab.thrower.thrower": "Thrower"
 }

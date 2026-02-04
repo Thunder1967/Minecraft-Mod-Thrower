@@ -6,8 +6,6 @@ import me.thunder.thrower.entity.client.MobNetEntityOpenModel;
 import me.thunder.thrower.item.ModItems;
 import me.thunder.thrower.item.client.ItemRendererExtension;
 import me.thunder.thrower.item.client.MobNetItemRenderer;
-import net.minecraft.client.renderer.entity.player.PlayerRenderer;
-import net.minecraft.client.resources.PlayerSkin;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;

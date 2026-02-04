@@ -64,7 +64,13 @@ public class FlyingBlock extends ThrowableItemProjectile {
     protected void onHitBlock(BlockHitResult result) {
         super.onHitBlock(result);
         if (!this.level().isClientSide) {
-            createBlockByUseOn(result);
+            Player player = this.getOwner() instanceof Player p ? p : null;
+            ItemStack item = this.getItem();
+            UseOnContext context = new UseOnContext(player, InteractionHand.MAIN_HAND, result);
+            InteractionResult res = item.getItem().useOn(context);
+            if(res == InteractionResult.PASS || res == InteractionResult.FAIL){
+                this.spawnAtLocation(new ItemStack(this.getItem().getItem()));
+            }
         }
     }
 
@@ -77,24 +83,25 @@ public class FlyingBlock extends ThrowableItemProjectile {
             Entity owner = this.getOwner();
             DamageSource source = this.damageSources().generic();
             double baseDamage = 1;
-            // play sound and specialize
+
+            // play sound and run damage
             if(owner!=null){
                 source = this.damageSources().fallingBlock(owner);
-            }
-            if(this.getItem().is(ItemTags.ANVIL)){
-                source = this.damageSources().anvil(owner);
-                baseDamage = 10;
+                if(this.getItem().is(ItemTags.ANVIL)){
+                    source = this.damageSources().anvil(owner);
+                    baseDamage = 10;
 
-                this.level().playSound(null, this.getX(), this.getY(), this.getZ(),
-                        SoundEvents.ANVIL_LAND, SoundSource.PLAYERS, 1.0F, 1.0F);
-            }
-            else{
-                SoundType soundType = this.getBlockState().getSoundType();
-                this.level().playSound(null, this.getX(), this.getY(), this.getZ(),
-                        soundType.getPlaceSound(),
-                        SoundSource.BLOCKS,
-                        (soundType.getVolume() + 1.0F) / 2.0F,
-                        soundType.getPitch() * 0.8F);
+                    this.level().playSound(null, this.getX(), this.getY(), this.getZ(),
+                            SoundEvents.ANVIL_LAND, SoundSource.PLAYERS, 1.0F, 1.0F);
+                }
+                else{
+                    SoundType soundType = this.getBlockState().getSoundType();
+                    this.level().playSound(null, this.getX(), this.getY(), this.getZ(),
+                            soundType.getPlaceSound(),
+                            SoundSource.BLOCKS,
+                            (soundType.getVolume() + 1.0F) / 2.0F,
+                            soundType.getPitch() * 0.8F);
+                }
             }
 
             // handle damage
@@ -108,15 +115,6 @@ public class FlyingBlock extends ThrowableItemProjectile {
         }
     }
 
-    private void createBlockByUseOn(BlockHitResult blockHit){
-        Player player = this.getOwner() instanceof Player p ? p : null;
-        ItemStack stack = this.getItem();
-        UseOnContext context = new UseOnContext(player, InteractionHand.MAIN_HAND, blockHit);
-        InteractionResult res = stack.getItem().useOn(context);
-        if(res == InteractionResult.PASS || res == InteractionResult.FAIL){
-            this.spawnAtLocation(new ItemStack(this.getItem().getItem()));
-        }
-    }
     @Override
     protected Item getDefaultItem() {
         return Items.AIR;

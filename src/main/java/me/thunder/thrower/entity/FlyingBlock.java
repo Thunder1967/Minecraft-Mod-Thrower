@@ -1,7 +1,11 @@
 package me.thunder.thrower.entity;
 
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
+import me.thunder.thrower.util.ModUtil;
+import net.minecraft.core.HolderGetter;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtUtils;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -15,13 +19,11 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.projectile.ThrowableItemProjectile;
 import net.minecraft.world.item.BlockItem;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockState;
@@ -30,7 +32,7 @@ import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 
 public class FlyingBlock extends ModThrowableProjectile {
-    private static final EntityDataAccessor<BlockState> DATA_BLOCK_STATE =
+    private static final EntityDataAccessor<BlockState> DataBlockState =
             SynchedEntityData.defineId(FlyingBlock.class, EntityDataSerializers.BLOCK_STATE);
 
     public FlyingBlock(EntityType<? extends FlyingBlock> type, Level level) {
@@ -43,15 +45,15 @@ public class FlyingBlock extends ModThrowableProjectile {
     @Override
     protected void defineSynchedData(SynchedEntityData.Builder builder) {
         super.defineSynchedData(builder);
-        builder.define(DATA_BLOCK_STATE, Blocks.AIR.defaultBlockState());
+        builder.define(DataBlockState, Blocks.AIR.defaultBlockState());
     }
 
     public void setBlockState(BlockState state) {
-        this.entityData.set(DATA_BLOCK_STATE, state);
+        this.entityData.set(DataBlockState, state);
     }
 
     public BlockState getBlockState() {
-        return this.entityData.get(DATA_BLOCK_STATE);
+        return this.entityData.get(DataBlockState);
     }
 
     @Override
@@ -112,6 +114,23 @@ public class FlyingBlock extends ModThrowableProjectile {
             if (target instanceof LivingEntity livingTarget) {
                 livingTarget.knockback(0.5D, this.getDeltaMovement().x(), this.getDeltaMovement().z());
             }
+        }
+    }
+
+    @Override
+    public void addAdditionalSaveData(CompoundTag nbt) {
+        super.addAdditionalSaveData(nbt);
+        CompoundTag blockStateNbt = NbtUtils.writeBlockState(getBlockState());
+        nbt.put("DataBlockState", blockStateNbt);
+    }
+
+    @Override
+    public void readAdditionalSaveData(CompoundTag nbt) {
+        super.readAdditionalSaveData(nbt);
+        if (nbt.contains("DataBlockState", Tag.TAG_COMPOUND)) {
+            HolderGetter<Block> blockGetter = this.level().holderLookup(Registries.BLOCK);
+            BlockState savedState = NbtUtils.readBlockState(blockGetter, nbt.getCompound("DataBlockState"));
+            setBlockState(savedState);
         }
     }
 }

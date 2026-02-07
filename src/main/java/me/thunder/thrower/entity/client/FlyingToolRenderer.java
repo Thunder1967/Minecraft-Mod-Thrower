@@ -28,14 +28,17 @@ public class FlyingToolRenderer extends EntityRenderer<FlyingTool> {
 
         // 轉正角度
         Vec3 motion = entity.getDeltaMovement().normalize();
-        float angleInDegrees = (float) (Mth.atan2(motion.z, motion.x) * (180 / Math.PI))-180f;
-        poseStack.mulPose(Axis.YP.rotationDegrees(-angleInDegrees));
+        float correctY = (float) (Mth.atan2(motion.z, motion.x) * (180 / Math.PI))-180f;
+        poseStack.mulPose(Axis.YP.rotationDegrees(-correctY));
+//        float correctX = (float) (Mth.atan2(motion.z, motion.y) * (180 / Math.PI))-90f;
+//        poseStack.mulPose(Axis.XP.rotationDegrees(-correctX));
+
 
 
         // rotation animation
         // compute the axis
         Vec3 up = new Vec3(0, 1, 0);
-        Vec3 correctMotion = motion.yRot(angleInDegrees * ((float)Math.PI / 180F));
+        Vec3 correctMotion = motion.yRot(correctY * ((float)Math.PI / 180F));
         Vec3 rotationAxis = correctMotion.cross(up).normalize();
         // check no zero
         if (rotationAxis.lengthSqr() < 1.0E-5D) {
@@ -44,15 +47,20 @@ public class FlyingToolRenderer extends EntityRenderer<FlyingTool> {
             rotationAxis = rotationAxis.normalize();
         }
         float rotationAngle;
-        if(FlyingTool.CanPickup.get(entity)){
-            // keep facing player
-            float radians = (float) Mth.atan2(correctMotion.y, Math.abs(correctMotion.x));
-            rotationAngle = ((float) Math.toDegrees(radians))+135f;
-        }
-        else{
+        if(FlyingTool.CanReturn.get(entity)){
             // keep rotating
             float time = entity.tickCount + partialTicks;
             rotationAngle = (time * 45.0F)%360F;
+        }
+        else{
+            // keep facing player
+            float radians = (float) Mth.atan2(correctMotion.y, Math.abs(correctMotion.x));
+            if(FlyingTool.CanPickUp.get(entity)){
+                rotationAngle = ((float) Math.toDegrees(radians))+135f;
+            }
+            else{
+                rotationAngle = ((float) Math.toDegrees(radians))-45f;
+            }
         }
         poseStack.mulPose(new Quaternionf().rotateAxis(
                 (float)Math.toRadians(rotationAngle), (float) rotationAxis.x,(float) rotationAxis.y,(float) rotationAxis.z

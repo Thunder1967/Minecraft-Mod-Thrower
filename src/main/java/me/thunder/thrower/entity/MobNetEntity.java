@@ -3,22 +3,19 @@ package me.thunder.thrower.entity;
 import me.thunder.thrower.ModDataComponents;
 import me.thunder.thrower.item.MobNetItem;
 import me.thunder.thrower.item.ModItems;
+import me.thunder.thrower.util.ModUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.projectile.ThrowableItemProjectile;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
@@ -26,16 +23,20 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
 public class MobNetEntity extends ModThrowableProjectile {
-    private static final EntityDataAccessor<Boolean> IS_EMPTY =
-            SynchedEntityData.defineId(MobNetEntity.class, EntityDataSerializers.BOOLEAN);
+    public static final ModUtil.EntityDataContainer<Boolean> IsEmptyNet =
+            new ModUtil.EntityDataContainer<>(MobNetEntity.class, EntityDataSerializers.BOOLEAN,
+                "IsEmptyNet",
+                CompoundTag::putBoolean,
+                CompoundTag::getBoolean
+            );
 
-    public MobNetEntity(EntityType<? extends ThrowableItemProjectile> p_37442_, Level p_37443_) {
+    public MobNetEntity(EntityType<? extends MobNetEntity> p_37442_, Level p_37443_) {
         super(p_37442_, p_37443_);
     }
 
     public MobNetEntity(LivingEntity entity, Level level, ItemStack item, ItemStack gloves) {
         super(ModEntities.MOB_NET_ENTITY.get(), entity, level, item, gloves);
-        setEmptyNet(MobNetItem.isEmptyNet(item));
+        IsEmptyNet.set(this,MobNetItem.isEmptyNet(item));
     }
 
     @Override
@@ -48,7 +49,7 @@ public class MobNetEntity extends ModThrowableProjectile {
     @Override
     protected void onHitEntity(EntityHitResult result) {
         if (this.level().isClientSide) return;
-        if(!isEmptyNet()){
+        if(!IsEmptyNet.get(this)){
             // release mob
             releaseMob(result.getLocation());
         }
@@ -82,7 +83,7 @@ public class MobNetEntity extends ModThrowableProjectile {
     protected void onHitBlock(BlockHitResult result) {
         super.onHitBlock(result);
         if (this.level().isClientSide) return;
-        if(!isEmptyNet()){
+        if(!IsEmptyNet.get(this)){
             // release mob
             BlockPos blockPos = result.getBlockPos();
             Vec3 pos = new Vec3(blockPos.getX()+0.5,blockPos.getY()+1,blockPos.getZ()+0.5);
@@ -110,13 +111,18 @@ public class MobNetEntity extends ModThrowableProjectile {
     @Override
     protected void defineSynchedData(SynchedEntityData.Builder builder) {
         super.defineSynchedData(builder);
-        builder.define(IS_EMPTY, true);
-    }
-    public void setEmptyNet(boolean empty) {
-        this.entityData.set(IS_EMPTY, empty);
+        builder.define(IsEmptyNet.getAccessor(), true);
     }
 
-    public boolean isEmptyNet() {
-        return this.entityData.get(IS_EMPTY);
+    @Override
+    public void addAdditionalSaveData(CompoundTag nbt) {
+        super.addAdditionalSaveData(nbt);
+        IsEmptyNet.saveNBT(this,nbt);
+    }
+
+    @Override
+    public void readAdditionalSaveData(CompoundTag nbt) {
+        super.readAdditionalSaveData(nbt);
+        IsEmptyNet.loadNBT(this, nbt);
     }
 }

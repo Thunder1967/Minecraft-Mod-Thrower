@@ -25,7 +25,7 @@ public class MobNetEntityRenderer extends EntityRenderer<MobNetEntity> {
 
     @Override
     public void render(MobNetEntity entity, float entityYaw, float partialTicks, PoseStack poseStack, MultiBufferSource buffer, int packedLight) {
-        HierarchicalModel<MobNetEntity> model = entity.isEmptyNet() ? this.openModel : this.closeModel;
+        HierarchicalModel<MobNetEntity> model = MobNetEntity.IsEmptyNet.get(entity) ? this.openModel : this.closeModel;
 
 
         poseStack.pushPose();

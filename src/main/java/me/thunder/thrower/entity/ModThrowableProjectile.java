@@ -3,8 +3,8 @@ package me.thunder.thrower.entity;
 import me.thunder.thrower.enchantment.ModEnchantments;
 import me.thunder.thrower.util.ModUtil;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.*;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
@@ -12,46 +12,59 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.entity.projectile.ThrowableItemProjectile;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.SwordItem;
-import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
-import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.event.EventHooks;
 
 import java.util.Optional;
 
 public abstract class ModThrowableProjectile extends ThrowableItemProjectile {
     protected ItemStack gloves;
-    protected int returnTimer=0;
-    protected int throwColdDown=0;
 
-
-    public static final ModUtil.EntityDataContainer<Boolean> CanPickup =
-            new ModUtil.EntityDataContainer<>(ModThrowableProjectile.class, EntityDataSerializers.BOOLEAN);
+    public static final ModUtil.EntityDataContainer<Boolean> CanPickUp =
+            new ModUtil.EntityDataContainer<>(ModThrowableProjectile.class, EntityDataSerializers.BOOLEAN,
+                    "CanPickUp",
+                    CompoundTag::putBoolean,
+                    CompoundTag::getBoolean);
     public static final ModUtil.EntityDataContainer<Boolean> CanReturn =
-            new ModUtil.EntityDataContainer<>(ModThrowableProjectile.class, EntityDataSerializers.BOOLEAN);
+            new ModUtil.EntityDataContainer<>(ModThrowableProjectile.class, EntityDataSerializers.BOOLEAN,
+                    "CanReturn",
+                    CompoundTag::putBoolean,
+                    CompoundTag::getBoolean);
     public static final ModUtil.EntityDataContainer<Integer> LowGravityLevel =
-            new ModUtil.EntityDataContainer<>(ModThrowableProjectile.class, EntityDataSerializers.INT);
+            new ModUtil.EntityDataContainer<>(ModThrowableProjectile.class, EntityDataSerializers.INT,
+                    "LowGravityLevel",
+                    CompoundTag::putInt,
+                    CompoundTag::getInt);
     public static final ModUtil.EntityDataContainer<Integer> BoomerangLevel =
-            new ModUtil.EntityDataContainer<>(ModThrowableProjectile.class, EntityDataSerializers.INT);
+            new ModUtil.EntityDataContainer<>(ModThrowableProjectile.class, EntityDataSerializers.INT,
+                    "BoomerangLevel",
+                    CompoundTag::putInt,
+                    CompoundTag::getInt);
+    public static final ModUtil.EntityDataContainer<Integer> ReturnTimer =
+            new ModUtil.EntityDataContainer<>(ModThrowableProjectile.class, EntityDataSerializers.INT,
+                    "ReturnTimer",
+                    CompoundTag::putInt,
+                    CompoundTag::getInt);
+    public static final ModUtil.EntityDataContainer<Integer> ThrowColdDown =
+            new ModUtil.EntityDataContainer<>(ModThrowableProjectile.class, EntityDataSerializers.INT,
+                    "ThrowColdDown",
+                    CompoundTag::putInt,
+                    CompoundTag::getInt);
 
-    public ModThrowableProjectile(EntityType<? extends ThrowableItemProjectile> p_37442_, Level p_37443_) {
+    public ModThrowableProjectile(EntityType<? extends ModThrowableProjectile> p_37442_, Level p_37443_) {
         super(p_37442_, p_37443_);
     }
 
-    public ModThrowableProjectile(EntityType<? extends ThrowableItemProjectile> entityType, LivingEntity owner, Level level, ItemStack item, ItemStack gloves) {
+    public ModThrowableProjectile(EntityType<? extends ModThrowableProjectile> entityType, LivingEntity owner, Level level, ItemStack item, ItemStack gloves) {
         super(entityType, owner, level);
         this.setItem(item);
         this.gloves = gloves;
-        throwColdDown = 0;
 
         // get enchantment
         if(!level.isClientSide){
@@ -59,6 +72,9 @@ public abstract class ModThrowableProjectile extends ThrowableItemProjectile {
             LowGravityLevel.set(this,this.gloves.getEnchantmentLevel(lookup.getOrThrow(ModEnchantments.LOWGRAVITY)));
             BoomerangLevel.set(this,this.gloves.getEnchantmentLevel(lookup.getOrThrow(ModEnchantments.BOOMERANG)));
             CanReturn.set(this,BoomerangLevel.get(this) > 0);
+        }
+        else{
+            System.out.println("Clinet");
         }
     }
 
@@ -69,7 +85,7 @@ public abstract class ModThrowableProjectile extends ThrowableItemProjectile {
 
     @Override
     public void tick() {
-        if(CanPickup.get(this)){
+        if(CanPickUp.get(this)){
             if(CanReturn.get(this)){
                 Entity owner = this.getOwner();
 
@@ -85,9 +101,9 @@ public abstract class ModThrowableProjectile extends ThrowableItemProjectile {
                 Vec3 direction = ownerPos.subtract(thisPos).normalize();
 
                 // go back with acceleration
-                double speed = Math.min(-1+(BoomerangLevel.get(this)*2),(this.returnTimer * 0.1));
+                double speed = Math.min(-1+(BoomerangLevel.get(this)*2),(ReturnTimer.get(this) * 0.1));
                 this.setDeltaMovement(direction.scale(speed*0.6).add(this.getDeltaMovement().scale(0.4)));
-                this.returnTimer++;
+                ReturnTimer.set(this,ReturnTimer.get(this)+1);
 
                 this.move(MoverType.SELF, this.getDeltaMovement());
             }
@@ -96,12 +112,11 @@ public abstract class ModThrowableProjectile extends ThrowableItemProjectile {
             }
             // detect collisions and retrieve item
             if (willHitPlayer()) {
-                System.out.println(this.returnTimer);
                 ItemStack stack = this.getItem();
                 Player player = (Player) this.getOwner();
 
                 player.getCooldowns().addCooldown(
-                        stack.getItem(), Math.max(0, throwColdDown-this.tickCount));
+                        stack.getItem(), Math.max(0, ThrowColdDown.get(this)-this.tickCount));
                 if (!player.getInventory().add(stack)) {
                     player.drop(stack, false);
                 }
@@ -117,15 +132,15 @@ public abstract class ModThrowableProjectile extends ThrowableItemProjectile {
 
     @Override
     protected void onHit(HitResult result) {
-        if(!CanPickup.get(this)){
+        if(!CanPickUp.get(this)){
             super.onHit(result);
-            CanPickup.set(this,true);
+            CanPickUp.set(this,true);
+            this.setDeltaMovement(0,0,0);
         }
     }
 
     @Override
     protected double getDefaultGravity() {
-        System.out.println(LowGravityLevel.get(this)+" "+this.level().getClass());
         return (5-LowGravityLevel.get(this))*0.01;
     }
 
@@ -137,10 +152,34 @@ public abstract class ModThrowableProjectile extends ThrowableItemProjectile {
     @Override
     protected void defineSynchedData(SynchedEntityData.Builder builder) {
         super.defineSynchedData(builder);
-        builder.define(CanPickup.getAccessor(), false);
+        builder.define(CanPickUp.getAccessor(), false);
         builder.define(CanReturn.getAccessor(), false);
         builder.define(LowGravityLevel.getAccessor(), 0);
         builder.define(BoomerangLevel.getAccessor(), 0);
+        builder.define(ReturnTimer.getAccessor(), 0);
+        builder.define(ThrowColdDown.getAccessor(), 0);
+    }
+
+    @Override
+    public void addAdditionalSaveData(CompoundTag nbt) {
+        super.addAdditionalSaveData(nbt);
+        CanPickUp.saveNBT(this, nbt);
+        CanReturn.saveNBT(this, nbt);
+        LowGravityLevel.saveNBT(this, nbt);
+        BoomerangLevel.saveNBT(this, nbt);
+        ReturnTimer.saveNBT(this, nbt);
+        ThrowColdDown.saveNBT(this, nbt);
+    }
+
+    @Override
+    public void readAdditionalSaveData(CompoundTag nbt) {
+        super.readAdditionalSaveData(nbt);
+        CanPickUp.loadNBT(this, nbt);
+        CanReturn.loadNBT(this, nbt);
+        LowGravityLevel.loadNBT(this, nbt);
+        BoomerangLevel.loadNBT(this, nbt);
+        ReturnTimer.loadNBT(this, nbt);
+        ThrowColdDown.loadNBT(this, nbt);
     }
 
     @Override

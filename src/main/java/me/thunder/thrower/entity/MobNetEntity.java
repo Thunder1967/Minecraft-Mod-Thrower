@@ -25,7 +25,7 @@ import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
-public class MobNetEntity extends ThrowableItemProjectile {
+public class MobNetEntity extends ModThrowableProjectile {
     private static final EntityDataAccessor<Boolean> IS_EMPTY =
             SynchedEntityData.defineId(MobNetEntity.class, EntityDataSerializers.BOOLEAN);
 
@@ -33,15 +33,9 @@ public class MobNetEntity extends ThrowableItemProjectile {
         super(p_37442_, p_37443_);
     }
 
-    public MobNetEntity(LivingEntity entity, Level level, ItemStack item) {
-        super(ModEntities.MOB_NET_ENTITY.get(), entity, level);
-        this.setItem(item);
+    public MobNetEntity(LivingEntity entity, Level level, ItemStack item, ItemStack gloves) {
+        super(ModEntities.MOB_NET_ENTITY.get(), entity, level, item, gloves);
         setEmptyNet(MobNetItem.isEmptyNet(item));
-    }
-
-    @Override
-    protected Item getDefaultItem() {
-        return Items.PAPER;
     }
 
     @Override

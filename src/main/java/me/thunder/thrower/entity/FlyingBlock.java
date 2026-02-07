@@ -29,16 +29,16 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 
-public class FlyingBlock extends ThrowableItemProjectile {
+public class FlyingBlock extends ModThrowableProjectile {
     private static final EntityDataAccessor<BlockState> DATA_BLOCK_STATE =
             SynchedEntityData.defineId(FlyingBlock.class, EntityDataSerializers.BLOCK_STATE);
+
     public FlyingBlock(EntityType<? extends FlyingBlock> type, Level level) {
         super(type, level);
     }
-    public FlyingBlock(Level level, LivingEntity owner, BlockState state) {
-        super(ModEntities.FLYING_BLOCK.get(), owner,level);
-        this.setBlockState(state);
-        this.setItem(new ItemStack(state.getBlock()));
+    public FlyingBlock(LivingEntity owner, Level level, ItemStack item, ItemStack gloves) {
+        super(ModEntities.FLYING_BLOCK.get(), owner,level, item, gloves);
+        this.setBlockState(((BlockItem)item.getItem()).getBlock().defaultBlockState());
     }
     @Override
     protected void defineSynchedData(SynchedEntityData.Builder builder) {
@@ -113,10 +113,5 @@ public class FlyingBlock extends ThrowableItemProjectile {
                 livingTarget.knockback(0.5D, this.getDeltaMovement().x(), this.getDeltaMovement().z());
             }
         }
-    }
-
-    @Override
-    protected Item getDefaultItem() {
-        return Items.AIR;
     }
 }

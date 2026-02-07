@@ -44,7 +44,7 @@ public class FlyingToolRenderer extends EntityRenderer<FlyingTool> {
             rotationAxis = rotationAxis.normalize();
         }
         float rotationAngle;
-        if(entity.getIsReturning()){
+        if(FlyingTool.CanPickup.get(entity)){
             // keep facing player
             float radians = (float) Mth.atan2(correctMotion.y, Math.abs(correctMotion.x));
             rotationAngle = ((float) Math.toDegrees(radians))+135f;

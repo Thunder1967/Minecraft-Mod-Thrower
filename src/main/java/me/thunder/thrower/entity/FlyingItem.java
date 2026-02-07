@@ -17,20 +17,14 @@ import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
-public class FlyingItem extends ThrowableItemProjectile {
+public class FlyingItem extends ModThrowableProjectile {
     public FlyingItem(EntityType<? extends FlyingItem> type, Level level) {
         super(type, level);
     }
 
-    public FlyingItem(LivingEntity owner, Level level, ItemStack item) {
-        super(ModEntities.FLYING_ITEM.get(), owner, level);
-        this.setItem(item);
+    public FlyingItem(LivingEntity owner, Level level, ItemStack item, ItemStack gloves) {
+        super(ModEntities.FLYING_ITEM.get(), owner, level, item, gloves);
     }
-    @Override
-    protected Item getDefaultItem() {
-        return Items.PAPER;
-    }
-
     @Override
     public void tick(){
         // empty bucket collect liquid

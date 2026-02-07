@@ -2,5 +2,8 @@
   "item.thrower.mob_net": "empty capture net",
   "mob_net.thrower.fill": "include",
   "item.thrower.gloves": "gloves",
-  "creativetab.thrower.thrower": "Thrower"
+  "creativetab.thrower.thrower": "Thrower",
+  "enchantment.thrower.boomerang": "boomerang",
+  "enchantment.thrower.muscle": "muscle",
+  "enchantment.thrower.lowgravity": "low gravity"
 }

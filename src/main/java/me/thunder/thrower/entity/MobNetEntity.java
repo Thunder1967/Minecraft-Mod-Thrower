@@ -47,6 +47,7 @@ public class MobNetEntity extends ModThrowableProjectile {
 
     @Override
     protected void onHitEntity(EntityHitResult result) {
+        super.onHitEntity(result);
         if (this.level().isClientSide) return;
         if(!IsEmptyNet.get(this)){
             // release mob

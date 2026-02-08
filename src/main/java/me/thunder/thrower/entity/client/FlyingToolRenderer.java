@@ -40,7 +40,7 @@ public class FlyingToolRenderer extends EntityRenderer<FlyingTool> {
         Vec3 rotationAxis = correctMotion.cross(up).normalize();
         // check no zero
         if (rotationAxis.lengthSqr() < 1.0E-5D) {
-            rotationAxis = new Vec3(0, 0, 1);
+            rotationAxis = new Vec3(0,0,1);
         } else {
             rotationAxis = rotationAxis.normalize();
         }
@@ -54,12 +54,12 @@ public class FlyingToolRenderer extends EntityRenderer<FlyingTool> {
         else{
             // keep facing player
             float radians = (float) Mth.atan2(correctMotion.y, Math.abs(correctMotion.x));
-            if(ModThrowableProjectile.CanPickUp.get(entity)){
-                rotationAngle = ((float) Math.toDegrees(radians))+135f;
+            poseStack.scale(1.0F, -1.0F, 1.0F);
+            if(rotationAxis.z==1){
+                rotationAngle = (float) -Math.toDegrees(radians)-135f;
             }
             else{
-                poseStack.scale(1.0F, -1.0F, 1.0F);
-                rotationAngle = ((float) -Math.toDegrees(radians))-60f;
+                rotationAngle = (float) -Math.toDegrees(radians)-60f;
             }
         }
         poseStack.mulPose(new Quaternionf().rotateAxis(

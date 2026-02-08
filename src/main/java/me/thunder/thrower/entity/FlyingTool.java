@@ -47,8 +47,8 @@ public class FlyingTool extends ModThrowableProjectile {
 
     @Override
     protected void onHitBlock(BlockHitResult result) {
-        if(CanPickUp.get(this)) return;
         super.onHitBlock(result);
+        if(CanPickUp.get(this)) return;
         if(this.level() instanceof ServerLevel serverLevel){
             BlockPos pos = result.getBlockPos();
             BlockState state = this.level().getBlockState(pos);
@@ -82,8 +82,8 @@ public class FlyingTool extends ModThrowableProjectile {
 
     @Override
     protected void onHitEntity(EntityHitResult result) {
-        if(CanPickUp.get(this)) return;
         super.onHitEntity(result);
+        if(CanPickUp.get(this)) return;
         ItemStack item = this.getItem();
 
         if (this.level() instanceof ServerLevel serverLevel &&

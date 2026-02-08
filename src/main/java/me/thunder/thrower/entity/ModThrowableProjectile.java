@@ -18,6 +18,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
@@ -103,7 +104,8 @@ public abstract class ModThrowableProjectile extends ThrowableItemProjectile {
                 this.move(MoverType.SELF, this.getDeltaMovement());
             }
             else{
-                this.setDeltaMovement(0,0,0);
+//                this.setDeltaMovement(0,0,0);
+                System.out.println(this.getDeltaMovement());
             }
             // detect collisions and retrieve item
             if (willHitPlayer()) {
@@ -132,6 +134,12 @@ public abstract class ModThrowableProjectile extends ThrowableItemProjectile {
             CanPickUp.set(this,true);
             this.noPhysics = true;
         }
+    }
+
+    @Override
+    protected void onHitBlock(BlockHitResult result) {
+        super.onHitBlock(result);
+        this.setDeltaMovement(result.getLocation().subtract(this.position()));
     }
 
     @Override

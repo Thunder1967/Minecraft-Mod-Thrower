@@ -3,6 +3,7 @@ package me.thunder.thrower.entity.client;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import me.thunder.thrower.entity.FlyingTool;
+import me.thunder.thrower.entity.ModThrowableProjectile;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
@@ -44,7 +45,7 @@ public class FlyingToolRenderer extends EntityRenderer<FlyingTool> {
             rotationAxis = rotationAxis.normalize();
         }
         float rotationAngle;
-        if(FlyingTool.CanReturn.get(entity)){
+        if(ModThrowableProjectile.CanReturn.get(entity)){
             poseStack.mulPose(Axis.XP.rotationDegrees(-90f));
             // keep rotating
             float time = entity.tickCount + partialTicks;
@@ -53,11 +54,10 @@ public class FlyingToolRenderer extends EntityRenderer<FlyingTool> {
         else{
             // keep facing player
             float radians = (float) Mth.atan2(correctMotion.y, Math.abs(correctMotion.x));
-            if(FlyingTool.CanPickUp.get(entity)){
+            if(ModThrowableProjectile.CanPickUp.get(entity)){
                 rotationAngle = ((float) Math.toDegrees(radians))+135f;
             }
             else{
-//                poseStack.mulPose(Axis.YP.rotationDegrees(-180f));
                 poseStack.scale(1.0F, -1.0F, 1.0F);
                 rotationAngle = ((float) -Math.toDegrees(radians))-60f;
             }

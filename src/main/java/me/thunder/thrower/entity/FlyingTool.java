@@ -32,7 +32,7 @@ import java.util.List;
 
 public class FlyingTool extends ModThrowableProjectile {
     public static final ModUtil.EntityDataContainer<Float> MoveDistance =
-            new ModUtil.EntityDataContainer<>(ModThrowableProjectile.class, EntityDataSerializers.FLOAT,
+            new ModUtil.EntityDataContainer<>(FlyingTool.class, EntityDataSerializers.FLOAT,
                     "MoveDistance",
                     CompoundTag::putFloat,
                     CompoundTag::getFloat);
@@ -117,7 +117,7 @@ public class FlyingTool extends ModThrowableProjectile {
                                 .getOrThrow(Enchantments.DENSITY),
                         item
                 );
-                finalDamage += (float) MoveDistance.get(this)/(5-densityLevel);
+                finalDamage += MoveDistance.get(this)/(5-densityLevel);
             }
 
             // apply damage

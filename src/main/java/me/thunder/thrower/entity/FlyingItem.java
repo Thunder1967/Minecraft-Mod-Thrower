@@ -2,6 +2,7 @@ package me.thunder.thrower.entity;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.*;
@@ -113,5 +114,9 @@ public class FlyingItem extends ModThrowableProjectile {
             this.spawnAtLocation(itemStack);
         }
         this.discard();
+    }
+    @Override
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
     }
 }

@@ -30,9 +30,6 @@ public class FlyingToolRenderer extends EntityRenderer<FlyingTool> {
         Vec3 motion = entity.getDeltaMovement().normalize();
         float correctY = (float) (Mth.atan2(motion.z, motion.x) * (180 / Math.PI))-180f;
         poseStack.mulPose(Axis.YP.rotationDegrees(-correctY));
-//        float correctX = (float) (Mth.atan2(motion.z, motion.y) * (180 / Math.PI))-90f;
-//        poseStack.mulPose(Axis.XP.rotationDegrees(-correctX));
-
 
 
         // rotation animation
@@ -48,6 +45,7 @@ public class FlyingToolRenderer extends EntityRenderer<FlyingTool> {
         }
         float rotationAngle;
         if(FlyingTool.CanReturn.get(entity)){
+            poseStack.mulPose(Axis.XP.rotationDegrees(-90f));
             // keep rotating
             float time = entity.tickCount + partialTicks;
             rotationAngle = (time * 45.0F)%360F;
@@ -59,7 +57,9 @@ public class FlyingToolRenderer extends EntityRenderer<FlyingTool> {
                 rotationAngle = ((float) Math.toDegrees(radians))+135f;
             }
             else{
-                rotationAngle = ((float) Math.toDegrees(radians))-45f;
+//                poseStack.mulPose(Axis.YP.rotationDegrees(-180f));
+                poseStack.scale(1.0F, -1.0F, 1.0F);
+                rotationAngle = ((float) -Math.toDegrees(radians))-60f;
             }
         }
         poseStack.mulPose(new Quaternionf().rotateAxis(

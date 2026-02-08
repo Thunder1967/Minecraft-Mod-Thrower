@@ -131,10 +131,7 @@ public class FlyingTool extends ModThrowableProjectile {
 
     @Override
     protected void onHit(HitResult result) {
-        if(CanPickUp.get(this)) return;
         super.onHit(result);
-        CanPickUp.set(this,true);
-        this.noPhysics = true;
     }
 
     @Override

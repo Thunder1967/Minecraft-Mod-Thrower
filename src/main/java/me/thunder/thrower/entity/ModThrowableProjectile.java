@@ -67,15 +67,10 @@ public abstract class ModThrowableProjectile extends ThrowableItemProjectile {
         this.gloves = gloves;
 
         // get enchantment
-        if(!level.isClientSide){
-            var lookup = owner.registryAccess().lookupOrThrow(Registries.ENCHANTMENT);
-            LowGravityLevel.set(this,this.gloves.getEnchantmentLevel(lookup.getOrThrow(ModEnchantments.LOWGRAVITY)));
-            BoomerangLevel.set(this,this.gloves.getEnchantmentLevel(lookup.getOrThrow(ModEnchantments.BOOMERANG)));
-            CanReturn.set(this,BoomerangLevel.get(this) > 0);
-        }
-        else{
-            System.out.println("Clinet");
-        }
+        var lookup = owner.registryAccess().lookupOrThrow(Registries.ENCHANTMENT);
+        LowGravityLevel.set(this,this.gloves.getEnchantmentLevel(lookup.getOrThrow(ModEnchantments.LOWGRAVITY)));
+        BoomerangLevel.set(this,this.gloves.getEnchantmentLevel(lookup.getOrThrow(ModEnchantments.BOOMERANG)));
+        CanReturn.set(this,BoomerangLevel.get(this) > 0);
     }
 
     @Override
@@ -135,7 +130,7 @@ public abstract class ModThrowableProjectile extends ThrowableItemProjectile {
         if(!CanPickUp.get(this)){
             super.onHit(result);
             CanPickUp.set(this,true);
-            this.setDeltaMovement(0,0,0);
+            this.noPhysics = true;
         }
     }
 

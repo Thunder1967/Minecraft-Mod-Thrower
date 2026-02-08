@@ -42,7 +42,6 @@ public class MobNetEntity extends ModThrowableProjectile {
     @Override
     protected void onHit(HitResult result) {
         super.onHit(result);
-        if (this.level().isClientSide) return;
         this.discard();
     }
 

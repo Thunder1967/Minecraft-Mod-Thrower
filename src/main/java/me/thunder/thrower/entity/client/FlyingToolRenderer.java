@@ -3,7 +3,7 @@ package me.thunder.thrower.entity.client;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import me.thunder.thrower.entity.FlyingTool;
-import me.thunder.thrower.entity.ModThrowableProjectile;
+import me.thunder.thrower.entity.GlovesThrowableProjectile;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
@@ -26,7 +26,7 @@ public class FlyingToolRenderer extends EntityRenderer<FlyingTool> {
     @Override
     public void render(FlyingTool entity, float yaw, float partialTicks, PoseStack poseStack, MultiBufferSource buffer, int packedLight) {
         poseStack.pushPose();
-
+        System.out.println(entity.getItem());
         // 轉正角度
         Vec3 motion = entity.getDeltaMovement().normalize();
         float correctY = (float) (Mth.atan2(motion.z, motion.x) * (180 / Math.PI))-180f;
@@ -45,7 +45,7 @@ public class FlyingToolRenderer extends EntityRenderer<FlyingTool> {
             rotationAxis = rotationAxis.normalize();
         }
         float rotationAngle;
-        if(ModThrowableProjectile.CanReturn.get(entity)){
+        if(GlovesThrowableProjectile.CanReturn.get(entity)){
             poseStack.mulPose(Axis.XP.rotationDegrees(-90f));
             // keep rotating
             float time = entity.tickCount + partialTicks;

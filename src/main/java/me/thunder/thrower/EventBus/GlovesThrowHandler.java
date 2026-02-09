@@ -93,8 +93,7 @@ public class GlovesThrowHandler {
                 0.5F, 0.4F / (level.getRandom().nextFloat() * 0.4F + 0.8F)
         );
         if(level instanceof ServerLevel serverLevel){
-            ItemStack stackCopy = item.copy();
-            stackCopy.setCount(1);
+            ItemStack stackCopy = item.copyWithCount(1);
             T thrownEntity = factory.create(player,level,stackCopy,gloves);
 
             Vec3 lookAngle = player.getLookAngle();

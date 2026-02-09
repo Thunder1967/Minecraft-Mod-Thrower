@@ -1,6 +1,5 @@
 package me.thunder.thrower.entity;
 
-import me.thunder.thrower.util.ModUtil;
 import net.minecraft.core.HolderGetter;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
@@ -31,7 +30,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 
-public class FlyingBlock extends ModThrowableProjectile {
+public class FlyingBlock extends GlovesThrowableProjectile {
     private static final EntityDataAccessor<BlockState> DataBlockState =
             SynchedEntityData.defineId(FlyingBlock.class, EntityDataSerializers.BLOCK_STATE);
 
@@ -71,7 +70,7 @@ public class FlyingBlock extends ModThrowableProjectile {
             UseOnContext context = new UseOnContext(player, InteractionHand.MAIN_HAND, result);
             InteractionResult res = item.getItem().useOn(context);
             if(res == InteractionResult.PASS || res == InteractionResult.FAIL){
-                this.spawnAtLocation(new ItemStack(this.getItem().getItem()));
+                this.spawnAtLocation();
             }
         }
     }
@@ -79,7 +78,7 @@ public class FlyingBlock extends ModThrowableProjectile {
     @Override
     protected void onHitEntity(EntityHitResult result) {
         super.onHitEntity(result);
-        this.spawnAtLocation(new ItemStack(getBlockState().getBlock()));
+        this.spawnAtLocation();
         if (!this.level().isClientSide) {
             Entity target = result.getEntity();
             Entity owner = this.getOwner();

@@ -22,7 +22,7 @@ import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
-public class MobNetEntity extends ModThrowableProjectile {
+public class MobNetEntity extends GlovesThrowableProjectile {
     public static final ModUtil.EntityDataContainer<Boolean> IsEmptyNet =
             new ModUtil.EntityDataContainer<>(MobNetEntity.class, EntityDataSerializers.BOOLEAN,
                 "IsEmptyNet",

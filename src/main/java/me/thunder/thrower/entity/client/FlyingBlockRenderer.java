@@ -25,6 +25,7 @@ public class FlyingBlockRenderer extends EntityRenderer<FlyingBlock> {
         BlockState state = entity.getBlockState();
         poseStack.pushPose();
         poseStack.translate(-0.5, 0.0, -0.5);
+        poseStack.scale(0.8f,0.8f,0.8f);
 
         if (state.getRenderShape() == RenderShape.MODEL) {
             this.blockRenderer.renderSingleBlock(state, poseStack, buffer, packedLight, OverlayTexture.NO_OVERLAY);

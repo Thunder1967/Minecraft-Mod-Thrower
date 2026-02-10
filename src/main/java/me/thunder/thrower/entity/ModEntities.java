@@ -22,7 +22,7 @@ public class ModEntities {
 
     public static final DeferredHolder<EntityType<?>, EntityType<FlyingBlock>> FLYING_BLOCK =
             ENTITY_TYPES.register("flying_block", () -> EntityType.Builder.<FlyingBlock>of(FlyingBlock::new, MobCategory.MISC)
-                    .sized(0.98F, 0.98F)
+                    .sized(0.8F, 0.8F)
                     .clientTrackingRange(4)
                     .updateInterval(2)
                     .fireImmune()

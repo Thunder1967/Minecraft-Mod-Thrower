@@ -3,7 +3,9 @@ package me.thunder.thrower.entity.client;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import me.thunder.thrower.entity.FlyingTool;
+import me.thunder.thrower.entity.GlovesCanReturnProjectile;
 import me.thunder.thrower.entity.GlovesThrowableProjectile;
+import me.thunder.thrower.util.ModUtil;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
@@ -16,6 +18,8 @@ import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Quaternionf;
 
+import java.util.List;
+
 public class FlyingToolRenderer extends EntityRenderer<FlyingTool> {
     private final ItemRenderer itemRenderer;
     public FlyingToolRenderer(EntityRendererProvider.Context context) {
@@ -26,9 +30,9 @@ public class FlyingToolRenderer extends EntityRenderer<FlyingTool> {
     @Override
     public void render(FlyingTool entity, float yaw, float partialTicks, PoseStack poseStack, MultiBufferSource buffer, int packedLight) {
         poseStack.pushPose();
-        System.out.println(entity.getItem());
         // 轉正角度
-        Vec3 motion = entity.getDeltaMovement().normalize();
+        List<ModUtil.SynchedEntityDataContainer<Float>> RM = GlovesCanReturnProjectile.renderMovement;
+        Vec3 motion = new Vec3(RM.get(0).get(entity),RM.get(1).get(entity),RM.get(2).get(entity)).normalize();
         float correctY = (float) (Mth.atan2(motion.z, motion.x) * (180 / Math.PI))-180f;
         poseStack.mulPose(Axis.YP.rotationDegrees(-correctY));
 
@@ -45,7 +49,7 @@ public class FlyingToolRenderer extends EntityRenderer<FlyingTool> {
             rotationAxis = rotationAxis.normalize();
         }
         float rotationAngle;
-        if(GlovesThrowableProjectile.CanReturn.get(entity)){
+        if(entity.canReturn()){
             poseStack.mulPose(Axis.XP.rotationDegrees(-90f));
             // keep rotating
             float time = entity.tickCount + partialTicks;

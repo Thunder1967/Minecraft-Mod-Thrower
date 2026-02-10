@@ -23,8 +23,8 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
 public class MobNetEntity extends GlovesThrowableProjectile {
-    public static final ModUtil.EntityDataContainer<Boolean> IsEmptyNet =
-            new ModUtil.EntityDataContainer<>(MobNetEntity.class, EntityDataSerializers.BOOLEAN,
+    public static final ModUtil.SynchedEntityDataContainer<Boolean> IsEmptyNet =
+            new ModUtil.SynchedEntityDataContainer<>(MobNetEntity.class, EntityDataSerializers.BOOLEAN,
                 "IsEmptyNet",
                 CompoundTag::putBoolean,
                 CompoundTag::getBoolean

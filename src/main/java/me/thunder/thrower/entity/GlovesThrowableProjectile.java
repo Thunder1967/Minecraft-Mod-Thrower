@@ -2,13 +2,14 @@ package me.thunder.thrower.entity;
 
 import me.thunder.thrower.enchantment.ModEnchantments;
 import me.thunder.thrower.util.ModUtil;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.*;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.world.entity.Entity;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -18,48 +19,46 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.phys.AABB;
-import net.minecraft.world.phys.BlockHitResult;
-import net.minecraft.world.phys.HitResult;
-import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.*;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import net.neoforged.neoforge.event.EventHooks;
 
+import java.util.List;
 import java.util.Optional;
 
 public abstract class GlovesThrowableProjectile extends Projectile implements ItemSupplier {
     private static final EntityDataAccessor<ItemStack> DATA_ITEM_STACK =
             SynchedEntityData.defineId(GlovesThrowableProjectile.class, EntityDataSerializers.ITEM_STACK);
 
-    public static final ModUtil.EntityDataContainer<Boolean> CanPickUp =
-            new ModUtil.EntityDataContainer<>(GlovesThrowableProjectile.class, EntityDataSerializers.BOOLEAN,
+    public static final ModUtil.SynchedEntityDataContainer<Boolean> CanPickUp =
+            new ModUtil.SynchedEntityDataContainer<>(GlovesThrowableProjectile.class, EntityDataSerializers.BOOLEAN,
                     "CanPickUp",
                     CompoundTag::putBoolean,
                     CompoundTag::getBoolean);
-    public static final ModUtil.EntityDataContainer<Boolean> CanReturn =
-            new ModUtil.EntityDataContainer<>(GlovesThrowableProjectile.class, EntityDataSerializers.BOOLEAN,
-                    "CanReturn",
+    public static final ModUtil.SynchedEntityDataContainer<Boolean> InGround =
+            new ModUtil.SynchedEntityDataContainer<>(GlovesThrowableProjectile.class, EntityDataSerializers.BOOLEAN,
+                    "InGround",
                     CompoundTag::putBoolean,
                     CompoundTag::getBoolean);
-    public static final ModUtil.EntityDataContainer<Integer> LowGravityLevel =
-            new ModUtil.EntityDataContainer<>(GlovesThrowableProjectile.class, EntityDataSerializers.INT,
+    public static final ModUtil.SynchedEntityDataContainer<Integer> LowGravityLevel =
+            new ModUtil.SynchedEntityDataContainer<>(GlovesThrowableProjectile.class, EntityDataSerializers.INT,
                     "LowGravityLevel",
                     CompoundTag::putInt,
                     CompoundTag::getInt);
-    public static final ModUtil.EntityDataContainer<Integer> BoomerangLevel =
-            new ModUtil.EntityDataContainer<>(GlovesThrowableProjectile.class, EntityDataSerializers.INT,
-                    "BoomerangLevel",
-                    CompoundTag::putInt,
-                    CompoundTag::getInt);
-    public static final ModUtil.EntityDataContainer<Integer> ReturnTimer =
-            new ModUtil.EntityDataContainer<>(GlovesThrowableProjectile.class, EntityDataSerializers.INT,
-                    "ReturnTimer",
-                    CompoundTag::putInt,
-                    CompoundTag::getInt);
-    public static final ModUtil.EntityDataContainer<Integer> ThrowColdDown =
-            new ModUtil.EntityDataContainer<>(GlovesThrowableProjectile.class, EntityDataSerializers.INT,
+    public static final ModUtil.SynchedEntityDataContainer<Integer> ThrowColdDown =
+            new ModUtil.SynchedEntityDataContainer<>(GlovesThrowableProjectile.class, EntityDataSerializers.INT,
                     "ThrowColdDown",
                     CompoundTag::putInt,
                     CompoundTag::getInt);
+    public static final List<ModUtil.SynchedEntityDataContainer<Float>> renderMovement = List.of(
+            new ModUtil.SynchedEntityDataContainer<>(GlovesThrowableProjectile.class, EntityDataSerializers.FLOAT,
+                    "vecX", CompoundTag::putFloat, CompoundTag::getFloat),
+            new ModUtil.SynchedEntityDataContainer<>(GlovesThrowableProjectile.class, EntityDataSerializers.FLOAT,
+                    "vecY", CompoundTag::putFloat, CompoundTag::getFloat),
+            new ModUtil.SynchedEntityDataContainer<>(GlovesThrowableProjectile.class, EntityDataSerializers.FLOAT,
+                    "vecZ", CompoundTag::putFloat, CompoundTag::getFloat)
+    );
 
     public GlovesThrowableProjectile(EntityType<? extends GlovesThrowableProjectile> p_37442_, Level p_37443_) {
         super(p_37442_, p_37443_);
@@ -74,8 +73,6 @@ public abstract class GlovesThrowableProjectile extends Projectile implements It
         // get enchantment
         var lookup = owner.registryAccess().lookupOrThrow(Registries.ENCHANTMENT);
         LowGravityLevel.set(this,gloves.getEnchantmentLevel(lookup.getOrThrow(ModEnchantments.LOWGRAVITY)));
-        BoomerangLevel.set(this,gloves.getEnchantmentLevel(lookup.getOrThrow(ModEnchantments.BOOMERANG)));
-        CanReturn.set(this,BoomerangLevel.get(this) > 0);
     }
 
     protected Item getDefaultItem() {
@@ -85,37 +82,16 @@ public abstract class GlovesThrowableProjectile extends Projectile implements It
     @Override
     public void tick() {
         super.tick();
-        boolean canMove = true;
         HitResult hitresult = ProjectileUtil.getHitResultOnMoveVector(this, this::canHitEntity);
         if (hitresult.getType() != HitResult.Type.MISS && !EventHooks.onProjectileImpact(this, hitresult)) {
             this.hitTargetOrDeflectSelf(hitresult);
-            canMove = false;
         }
+
         this.checkInsideBlocks();
         this.updateRotation();
+        this.checkInGround();
 
         if(CanPickUp.get(this)){
-            if(CanReturn.get(this)){
-                Entity owner = this.getOwner();
-
-                // if owner die, drop as item
-                if (owner == null || !owner.isAlive()) {
-                    this.spawnAtLocation();
-                    this.discard();
-                    return;
-                }
-
-                Vec3 ownerPos = owner.getEyePosition();
-                Vec3 thisPos = this.position();
-                Vec3 direction = ownerPos.subtract(thisPos).normalize();
-
-                // go back with acceleration
-                double speed = Math.min(-1+(BoomerangLevel.get(this)*2),(ReturnTimer.get(this) * 0.1));
-                this.setDeltaMovement(direction.scale(speed*0.6).add(this.getDeltaMovement().scale(0.4)));
-                ReturnTimer.set(this,ReturnTimer.get(this)+1);
-
-                canMove = true;
-            }
             // detect collisions and retrieve item
             if (willHitPlayer()) {
                 ItemStack stack = this.getItem();
@@ -132,28 +108,36 @@ public abstract class GlovesThrowableProjectile extends Projectile implements It
             }
         }
 
-        if(canMove){
+        if(!InGround.get(this)){
+            System.out.println(this.level().toString() + this.getDeltaMovement().toString());
             simpleMove();
             this.applyDrag(0.99);
             this.applyGravity();
+            Vec3 motion = this.getDeltaMovement();
+            renderMovement.get(0).set(this,(float)motion.x);
+            renderMovement.get(1).set(this,(float)motion.y);
+            renderMovement.get(2).set(this,(float)motion.z);
         }
     }
 
     @Override
-    protected void onHit(HitResult result) {
-        if(!CanPickUp.get(this)){
-            super.onHit(result);
-            CanPickUp.set(this,true);
-            applyDrag(0.5);
-            this.noPhysics = true;
-        }
+    protected void onHitEntity(EntityHitResult result) {
+        super.onHitEntity(result);
+        Vec3 curMotion = this.getDeltaMovement();
+        Vec3 reflect = this.position().subtract(result.getEntity().position()).normalize()
+                .scale(curMotion.lengthSqr());
+        this.setDeltaMovement(curMotion.add(reflect).scale(0.2));
     }
 
     @Override
     protected void onHitBlock(BlockHitResult result) {
         super.onHitBlock(result);
-        this.setDeltaMovement(result.getLocation().subtract(this.position()));
+        if(!InGround.get(this)){
+            InGround.set(this,true);
+            this.applyDrag(0.5);
+        }
     }
+
 
     @Override
     protected double getDefaultGravity() {
@@ -165,11 +149,12 @@ public abstract class GlovesThrowableProjectile extends Projectile implements It
         builder.define(DATA_ITEM_STACK, new ItemStack(this.getDefaultItem()));
 
         builder.define(CanPickUp.getAccessor(), false);
-        builder.define(CanReturn.getAccessor(), false);
         builder.define(LowGravityLevel.getAccessor(), 0);
-        builder.define(BoomerangLevel.getAccessor(), 0);
-        builder.define(ReturnTimer.getAccessor(), 0);
         builder.define(ThrowColdDown.getAccessor(), 0);
+        builder.define(InGround.getAccessor(), false);
+        for(var i : renderMovement){
+            builder.define(i.getAccessor(),0f);
+        }
     }
 
     @Override
@@ -179,11 +164,12 @@ public abstract class GlovesThrowableProjectile extends Projectile implements It
         nbt.put("Item", this.getItem().save(this.registryAccess()));
 
         CanPickUp.saveNBT(this, nbt);
-        CanReturn.saveNBT(this, nbt);
+        InGround.saveNBT(this, nbt);
         LowGravityLevel.saveNBT(this, nbt);
-        BoomerangLevel.saveNBT(this, nbt);
-        ReturnTimer.saveNBT(this, nbt);
         ThrowColdDown.saveNBT(this, nbt);
+        for(var i : renderMovement){
+            i.saveNBT(this, nbt);
+        }
     }
 
     @Override
@@ -195,18 +181,15 @@ public abstract class GlovesThrowableProjectile extends Projectile implements It
         }
 
         CanPickUp.loadNBT(this, nbt);
-        CanReturn.loadNBT(this, nbt);
+        InGround.loadNBT(this, nbt);
         LowGravityLevel.loadNBT(this, nbt);
-        BoomerangLevel.loadNBT(this, nbt);
-        ReturnTimer.loadNBT(this, nbt);
         ThrowColdDown.loadNBT(this, nbt);
+        for(var i : renderMovement){
+            i.loadNBT(this, nbt);
+        }
     }
 
     @Override
-    public boolean canUsePortal(boolean allowPassengers) {
-        return CanReturn.get(this);
-    }
-
     public boolean shouldRenderAtSqrDistance(double distance) {
         double d0 = this.getBoundingBox().getSize() * (double)4.0F;
         if (Double.isNaN(d0)) {
@@ -217,7 +200,7 @@ public abstract class GlovesThrowableProjectile extends Projectile implements It
         return distance < d0 * d0;
     }
 
-    private void simpleMove(){
+    protected void simpleMove(){
         Vec3 vec3 = this.getDeltaMovement();
 
         double d0 = this.getX() + vec3.x;
@@ -231,6 +214,30 @@ public abstract class GlovesThrowableProjectile extends Projectile implements It
         }
 
         this.setPos(d0, d1, d2);
+    }
+
+    protected boolean isNoPhysics(){
+        return this.level().isClientSide || this.noPhysics;
+    }
+
+    private void checkInGround(){
+        if(!isNoPhysics()){
+            BlockPos blockpos = this.blockPosition();
+            BlockState blockstate = this.level().getBlockState(blockpos);
+            if (InGround.get(this) && !blockstate.isAir()) {
+                VoxelShape voxelshape = blockstate.getCollisionShape(this.level(), blockpos);
+                if (!voxelshape.isEmpty()) {
+                    Vec3 vec31 = this.position();
+
+                    for(AABB aabb : voxelshape.toAabbs()) {
+                        if (aabb.move(blockpos).contains(vec31)) {
+                            return;
+                        }
+                    }
+                }
+            }
+            InGround.set(this, false);
+        }
     }
 
     private boolean willHitPlayer() {
@@ -258,7 +265,7 @@ public abstract class GlovesThrowableProjectile extends Projectile implements It
         return this.getEntityData().get(DATA_ITEM_STACK);
     }
 
-    private void applyDrag(double x){
+    protected void applyDrag(double x){
         if(!this.noPhysics) this.setDeltaMovement(this.getDeltaMovement().scale(x));
     }
 

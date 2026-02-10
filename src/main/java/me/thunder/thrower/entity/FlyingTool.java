@@ -30,9 +30,9 @@ import net.minecraft.world.item.enchantment.EnchantmentHelper;
 
 import java.util.List;
 
-public class FlyingTool extends GlovesThrowableProjectile {
-    public static final ModUtil.EntityDataContainer<Float> MoveDistance =
-            new ModUtil.EntityDataContainer<>(FlyingTool.class, EntityDataSerializers.FLOAT,
+public class FlyingTool extends GlovesCanReturnProjectile {
+    public static final ModUtil.SynchedEntityDataContainer<Float> MoveDistance =
+            new ModUtil.SynchedEntityDataContainer<>(FlyingTool.class, EntityDataSerializers.FLOAT,
                     "MoveDistance",
                     CompoundTag::putFloat,
                     CompoundTag::getFloat);

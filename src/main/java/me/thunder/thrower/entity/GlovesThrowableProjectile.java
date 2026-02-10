@@ -1,7 +1,7 @@
 package me.thunder.thrower.entity;
 
 import me.thunder.thrower.enchantment.ModEnchantments;
-import me.thunder.thrower.util.ModUtil;
+import me.thunder.thrower.util.ModDataContainer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.Registries;
@@ -9,7 +9,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.*;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.util.Mth;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -31,34 +30,26 @@ public abstract class GlovesThrowableProjectile extends Projectile implements It
     private static final EntityDataAccessor<ItemStack> DATA_ITEM_STACK =
             SynchedEntityData.defineId(GlovesThrowableProjectile.class, EntityDataSerializers.ITEM_STACK);
 
-    public static final ModUtil.SynchedEntityDataContainer<Boolean> CanPickUp =
-            new ModUtil.SynchedEntityDataContainer<>(GlovesThrowableProjectile.class, EntityDataSerializers.BOOLEAN,
+    public static final ModDataContainer.SynchedEntityDataContainer<Boolean> CanPickUp =
+            new ModDataContainer.SynchedEntityDataContainer<>(GlovesThrowableProjectile.class, EntityDataSerializers.BOOLEAN,
                     "CanPickUp",
                     CompoundTag::putBoolean,
                     CompoundTag::getBoolean);
-    public static final ModUtil.SynchedEntityDataContainer<Boolean> InGround =
-            new ModUtil.SynchedEntityDataContainer<>(GlovesThrowableProjectile.class, EntityDataSerializers.BOOLEAN,
+    public static final ModDataContainer.SynchedEntityDataContainer<Boolean> InGround =
+            new ModDataContainer.SynchedEntityDataContainer<>(GlovesThrowableProjectile.class, EntityDataSerializers.BOOLEAN,
                     "InGround",
                     CompoundTag::putBoolean,
                     CompoundTag::getBoolean);
-    public static final ModUtil.SynchedEntityDataContainer<Integer> LowGravityLevel =
-            new ModUtil.SynchedEntityDataContainer<>(GlovesThrowableProjectile.class, EntityDataSerializers.INT,
+    public static final ModDataContainer.SynchedEntityDataContainer<Integer> LowGravityLevel =
+            new ModDataContainer.SynchedEntityDataContainer<>(GlovesThrowableProjectile.class, EntityDataSerializers.INT,
                     "LowGravityLevel",
                     CompoundTag::putInt,
                     CompoundTag::getInt);
-    public static final ModUtil.SynchedEntityDataContainer<Integer> ThrowColdDown =
-            new ModUtil.SynchedEntityDataContainer<>(GlovesThrowableProjectile.class, EntityDataSerializers.INT,
+    public static final ModDataContainer.SynchedEntityDataContainer<Integer> ThrowColdDown =
+            new ModDataContainer.SynchedEntityDataContainer<>(GlovesThrowableProjectile.class, EntityDataSerializers.INT,
                     "ThrowColdDown",
                     CompoundTag::putInt,
                     CompoundTag::getInt);
-    public static final List<ModUtil.SynchedEntityDataContainer<Float>> renderMovement = List.of(
-            new ModUtil.SynchedEntityDataContainer<>(GlovesThrowableProjectile.class, EntityDataSerializers.FLOAT,
-                    "vecX", CompoundTag::putFloat, CompoundTag::getFloat),
-            new ModUtil.SynchedEntityDataContainer<>(GlovesThrowableProjectile.class, EntityDataSerializers.FLOAT,
-                    "vecY", CompoundTag::putFloat, CompoundTag::getFloat),
-            new ModUtil.SynchedEntityDataContainer<>(GlovesThrowableProjectile.class, EntityDataSerializers.FLOAT,
-                    "vecZ", CompoundTag::putFloat, CompoundTag::getFloat)
-    );
 
     public GlovesThrowableProjectile(EntityType<? extends GlovesThrowableProjectile> p_37442_, Level p_37443_) {
         super(p_37442_, p_37443_);
@@ -103,20 +94,17 @@ public abstract class GlovesThrowableProjectile extends Projectile implements It
                     player.drop(stack, false);
                 }
                 this.level().playSound(null, player.getX(), player.getY(), player.getZ(),
-                        SoundEvents.TRIDENT_RETURN, SoundSource.PLAYERS, 1.0F, 1.0F);
+                        SoundEvents.ITEM_PICKUP, SoundSource.PLAYERS,
+                        0.5F, 0.4F / (this.level().getRandom().nextFloat() * 0.4F + 0.8F));
                 this.discard();
             }
         }
 
         if(!InGround.get(this)){
-            System.out.println(this.level().toString() + this.getDeltaMovement().toString());
             simpleMove();
             this.applyDrag(0.99);
             this.applyGravity();
             Vec3 motion = this.getDeltaMovement();
-            renderMovement.get(0).set(this,(float)motion.x);
-            renderMovement.get(1).set(this,(float)motion.y);
-            renderMovement.get(2).set(this,(float)motion.z);
         }
     }
 
@@ -152,9 +140,6 @@ public abstract class GlovesThrowableProjectile extends Projectile implements It
         builder.define(LowGravityLevel.getAccessor(), 0);
         builder.define(ThrowColdDown.getAccessor(), 0);
         builder.define(InGround.getAccessor(), false);
-        for(var i : renderMovement){
-            builder.define(i.getAccessor(),0f);
-        }
     }
 
     @Override
@@ -167,9 +152,6 @@ public abstract class GlovesThrowableProjectile extends Projectile implements It
         InGround.saveNBT(this, nbt);
         LowGravityLevel.saveNBT(this, nbt);
         ThrowColdDown.saveNBT(this, nbt);
-        for(var i : renderMovement){
-            i.saveNBT(this, nbt);
-        }
     }
 
     @Override
@@ -184,9 +166,6 @@ public abstract class GlovesThrowableProjectile extends Projectile implements It
         InGround.loadNBT(this, nbt);
         LowGravityLevel.loadNBT(this, nbt);
         ThrowColdDown.loadNBT(this, nbt);
-        for(var i : renderMovement){
-            i.loadNBT(this, nbt);
-        }
     }
 
     @Override

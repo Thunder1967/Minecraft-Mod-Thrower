@@ -20,6 +20,14 @@ public class ModEntities {
                     .fireImmune()
                     .build("flying_item"));
 
+    public static final DeferredHolder<EntityType<?>, EntityType<FlyingBucket>> FLYING_BUCKET =
+            ENTITY_TYPES.register("flying_bucket", () -> EntityType.Builder.<FlyingBucket>of(FlyingBucket::new, MobCategory.MISC)
+                    .sized(0.25F, 0.25F)
+                    .clientTrackingRange(4)
+                    .updateInterval(10)
+                    .fireImmune()
+                    .build("flying_bucket"));
+
     public static final DeferredHolder<EntityType<?>, EntityType<FlyingBlock>> FLYING_BLOCK =
             ENTITY_TYPES.register("flying_block", () -> EntityType.Builder.<FlyingBlock>of(FlyingBlock::new, MobCategory.MISC)
                     .sized(0.8F, 0.8F)

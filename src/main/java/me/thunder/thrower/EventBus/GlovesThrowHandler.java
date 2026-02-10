@@ -1,10 +1,7 @@
 package me.thunder.thrower.EventBus;
 
 import me.thunder.thrower.enchantment.ModEnchantments;
-import me.thunder.thrower.entity.FlyingBlock;
-import me.thunder.thrower.entity.FlyingItem;
-import me.thunder.thrower.entity.FlyingTool;
-import me.thunder.thrower.entity.MobNetEntity;
+import me.thunder.thrower.entity.*;
 import me.thunder.thrower.item.MobNetItem;
 import me.thunder.thrower.item.ModItems;
 import me.thunder.thrower.util.ModTags;
@@ -46,19 +43,12 @@ public class GlovesThrowHandler {
                     (a,b,c,d) -> new PrimedTnt(b, a.getX(), a.getEyeY(), a.getZ(), a));
         }
         else if (item.getItem() instanceof SpawnEggItem ||
-                item.is(Items.BUCKET) ||
                 item.is(Items.FIRE_CHARGE) ||
                 item.is(Items.END_CRYSTAL)) {
             ThrowEntity(player,level,item,gloves, true, FlyingItem::new);
         }
-        else if (item.getItem() instanceof BucketItem) {
-            ThrowEntity(player,level,item,gloves, true, FlyingItem::new);
-            if (!player.getAbilities().instabuild) {
-                ItemStack emptyBucket = new ItemStack(Items.BUCKET);
-                if (!player.getInventory().add(emptyBucket)) {
-                    player.drop(emptyBucket, false);
-                }
-            }
+        else if (item.getItem() instanceof DispensibleContainerItem || item.is(Items.BUCKET)) {
+            ThrowEntity(player,level,item,gloves, true, FlyingBucket::new);
         }
         else if(item.getItem() instanceof DiggerItem ||
                 item.getItem() instanceof SwordItem ||
@@ -102,7 +92,7 @@ public class GlovesThrowHandler {
                             .lookupOrThrow(Registries.ENCHANTMENT)
                             .getOrThrow(ModEnchantments.MUSCLE),
                     gloves)*0.1;
-            thrownEntity.setDeltaMovement(lookAngle.x*speed, lookAngle.y*speed+0.1, lookAngle.z*speed);
+            thrownEntity.setDeltaMovement(lookAngle.scale(speed).add(player.getDeltaMovement()));
             level.addFreshEntity(thrownEntity);
 
             if (doShrink && !player.getAbilities().instabuild) {

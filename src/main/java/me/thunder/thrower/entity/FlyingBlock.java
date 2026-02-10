@@ -78,7 +78,6 @@ public class FlyingBlock extends GlovesThrowableProjectile {
     @Override
     protected void onHitEntity(EntityHitResult result) {
         super.onHitEntity(result);
-//        this.spawnAtLocation();
         if (!this.level().isClientSide) {
             Entity target = result.getEntity();
             Entity owner = this.getOwner();

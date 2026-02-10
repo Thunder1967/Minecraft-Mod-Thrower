@@ -2,10 +2,7 @@ package me.thunder.thrower.entity.client;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
-import me.thunder.thrower.entity.FlyingTool;
 import me.thunder.thrower.entity.GlovesCanReturnProjectile;
-import me.thunder.thrower.entity.GlovesThrowableProjectile;
-import me.thunder.thrower.util.ModUtil;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
@@ -18,9 +15,7 @@ import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Quaternionf;
 
-import java.util.List;
-
-public class FlyingToolRenderer extends EntityRenderer<FlyingTool> {
+public class FlyingToolRenderer extends EntityRenderer<GlovesCanReturnProjectile> {
     private final ItemRenderer itemRenderer;
     public FlyingToolRenderer(EntityRendererProvider.Context context) {
         super(context);
@@ -28,11 +23,10 @@ public class FlyingToolRenderer extends EntityRenderer<FlyingTool> {
     }
 
     @Override
-    public void render(FlyingTool entity, float yaw, float partialTicks, PoseStack poseStack, MultiBufferSource buffer, int packedLight) {
+    public void render(GlovesCanReturnProjectile entity, float yaw, float partialTicks, PoseStack poseStack, MultiBufferSource buffer, int packedLight) {
         poseStack.pushPose();
         // 轉正角度
-        List<ModUtil.SynchedEntityDataContainer<Float>> RM = GlovesCanReturnProjectile.renderMovement;
-        Vec3 motion = new Vec3(RM.get(0).get(entity),RM.get(1).get(entity),RM.get(2).get(entity)).normalize();
+        Vec3 motion = entity.getDeltaMovement();
         float correctY = (float) (Mth.atan2(motion.z, motion.x) * (180 / Math.PI))-180f;
         poseStack.mulPose(Axis.YP.rotationDegrees(-correctY));
 
@@ -79,7 +73,7 @@ public class FlyingToolRenderer extends EntityRenderer<FlyingTool> {
     }
 
     @Override
-    public ResourceLocation getTextureLocation(FlyingTool p_114482_) {
+    public ResourceLocation getTextureLocation(GlovesCanReturnProjectile p_114482_) {
         return InventoryMenu.BLOCK_ATLAS;
     }
 }

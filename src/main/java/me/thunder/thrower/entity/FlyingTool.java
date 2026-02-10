@@ -1,6 +1,6 @@
 package me.thunder.thrower.entity;
 
-import me.thunder.thrower.util.ModUtil;
+import me.thunder.thrower.util.ModDataContainer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
@@ -31,8 +31,8 @@ import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import java.util.List;
 
 public class FlyingTool extends GlovesCanReturnProjectile {
-    public static final ModUtil.SynchedEntityDataContainer<Float> MoveDistance =
-            new ModUtil.SynchedEntityDataContainer<>(FlyingTool.class, EntityDataSerializers.FLOAT,
+    public static final ModDataContainer.SynchedEntityDataContainer<Float> MoveDistance =
+            new ModDataContainer.SynchedEntityDataContainer<>(FlyingTool.class, EntityDataSerializers.FLOAT,
                     "MoveDistance",
                     CompoundTag::putFloat,
                     CompoundTag::getFloat);

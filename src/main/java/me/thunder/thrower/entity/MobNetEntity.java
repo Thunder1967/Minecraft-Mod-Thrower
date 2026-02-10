@@ -3,7 +3,7 @@ package me.thunder.thrower.entity;
 import me.thunder.thrower.ModDataComponents;
 import me.thunder.thrower.item.MobNetItem;
 import me.thunder.thrower.item.ModItems;
-import me.thunder.thrower.util.ModUtil;
+import me.thunder.thrower.util.ModDataContainer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -23,8 +23,8 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
 public class MobNetEntity extends GlovesThrowableProjectile {
-    public static final ModUtil.SynchedEntityDataContainer<Boolean> IsEmptyNet =
-            new ModUtil.SynchedEntityDataContainer<>(MobNetEntity.class, EntityDataSerializers.BOOLEAN,
+    public static final ModDataContainer.SynchedEntityDataContainer<Boolean> IsEmptyNet =
+            new ModDataContainer.SynchedEntityDataContainer<>(MobNetEntity.class, EntityDataSerializers.BOOLEAN,
                 "IsEmptyNet",
                 CompoundTag::putBoolean,
                 CompoundTag::getBoolean

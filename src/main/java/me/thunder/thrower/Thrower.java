@@ -80,6 +80,7 @@ public class Thrower {
             event.registerEntityRenderer(ModEntities.FLYING_BLOCK.get(), FlyingBlockRenderer::new);
             event.registerEntityRenderer(ModEntities.FLYING_TOOL.get(), FlyingToolRenderer::new);
             event.registerEntityRenderer(ModEntities.MOB_NET_ENTITY.get(), MobNetEntityRenderer::new);
+            event.registerEntityRenderer(ModEntities.FLYING_BUCKET.get(), FlyingToolRenderer::new);
         }
     }
 }

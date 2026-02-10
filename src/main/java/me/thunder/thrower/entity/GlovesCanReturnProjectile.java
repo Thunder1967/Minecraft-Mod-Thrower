@@ -1,7 +1,7 @@
 package me.thunder.thrower.entity;
 
 import me.thunder.thrower.enchantment.ModEnchantments;
-import me.thunder.thrower.util.ModUtil;
+import me.thunder.thrower.util.ModDataContainer;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -11,18 +11,14 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
-import org.joml.Vector3f;
-
-import java.util.List;
 
 public abstract class GlovesCanReturnProjectile extends GlovesThrowableProjectile{
     protected int returnTimer = 0;
 
-    public static final ModUtil.SynchedEntityDataContainer<Integer> BoomerangLevel =
-            new ModUtil.SynchedEntityDataContainer<>(GlovesCanReturnProjectile.class, EntityDataSerializers.INT,
+    public static final ModDataContainer.SynchedEntityDataContainer<Integer> BoomerangLevel =
+            new ModDataContainer.SynchedEntityDataContainer<>(GlovesCanReturnProjectile.class, EntityDataSerializers.INT,
                     "BoomerangLevel",
                     CompoundTag::putInt,
                     CompoundTag::getInt);

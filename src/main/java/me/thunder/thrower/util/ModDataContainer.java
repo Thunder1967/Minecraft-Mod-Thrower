@@ -6,12 +6,11 @@ import net.minecraft.network.syncher.EntityDataSerializer;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.world.entity.Entity;
 import org.apache.logging.log4j.util.TriConsumer;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
 import java.util.function.BiFunction;
 
-public abstract class ModUtil {
+public abstract class ModDataContainer {
     public static class SynchedEntityDataContainer<T> extends nbtRegister<T> {
         private final EntityDataAccessor<T> accessor;
 

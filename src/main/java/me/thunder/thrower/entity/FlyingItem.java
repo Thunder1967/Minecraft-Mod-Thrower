@@ -25,37 +25,13 @@ public class FlyingItem extends GlovesThrowableProjectile {
     public FlyingItem(LivingEntity owner, Level level, ItemStack item, ItemStack gloves) {
         super(ModEntities.FLYING_ITEM.get(), owner, level, item, gloves);
     }
-    @Override
-    public void tick(){
-        // empty bucket collect liquid
-        // check whether hit liquid
-        if (this.getItem().is(Items.BUCKET) && !this.level().isClientSide) {
-            BlockPos pos = this.blockPosition();
-            BlockState state = this.level().getBlockState(pos);
-            //in liquid
-            if (!state.getFluidState().isEmpty()) {
-                Player player = this.getOwner() instanceof Player p ? p : null;
-                if (state.getBlock() instanceof BucketPickup pickup) {
-                    ItemStack filledBucket = pickup.pickupBlock(player, this.level(), pos, state);
-                    // after success
-                    if (!filledBucket.isEmpty()) {
-                        this.level().playSound(null, pos, SoundEvents.BUCKET_FILL, SoundSource.BLOCKS, 1.0F, 1.0F);
-                        if(!player.getAbilities().instabuild) this.spawnAtLocation(filledBucket);
-                        this.discard();
-                    }
-                }
-            }
-        }
 
-        super.tick();
-    }
     @Override
     protected void onHit(HitResult result) {
         super.onHit(result);
         if(this.level().isClientSide) return;
         ItemStack itemStack = this.getItem();
         Item item = itemStack.getItem();
-        Player player = this.getOwner() instanceof Player p ? p : null;
         if (item instanceof SpawnEggItem eggItem){
             EntityType<?> type = eggItem.getType(itemStack);
             Entity entity =type.create(this.level());
@@ -75,16 +51,6 @@ public class FlyingItem extends GlovesThrowableProjectile {
                 }
 
                 this.level().addFreshEntity(entity);
-            }
-        }
-        else if (item instanceof  BucketItem bucketItem) {
-            if(result instanceof BlockHitResult blockHit){
-                BlockPos targetPos = blockHit.getBlockPos().relative(blockHit.getDirection());
-                bucketItem.emptyContents(player, this.level(), targetPos, blockHit);
-            }
-            else if(result instanceof EntityHitResult entityHitResult){
-                BlockPos targetPos = entityHitResult.getEntity().blockPosition();
-                bucketItem.emptyContents(player, this.level(), targetPos, null);
             }
         }
         else if (itemStack.is(Items.FIRE_CHARGE)){

@@ -9,6 +9,9 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.*;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.ItemTags;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -18,12 +21,12 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.*;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.neoforged.neoforge.event.EventHooks;
 
-import java.util.List;
 import java.util.Optional;
 
 public abstract class GlovesThrowableProjectile extends Projectile implements ItemSupplier {
@@ -43,11 +46,6 @@ public abstract class GlovesThrowableProjectile extends Projectile implements It
     public static final ModDataContainer.SynchedEntityDataContainer<Integer> LowGravityLevel =
             new ModDataContainer.SynchedEntityDataContainer<>(GlovesThrowableProjectile.class, EntityDataSerializers.INT,
                     "LowGravityLevel",
-                    CompoundTag::putInt,
-                    CompoundTag::getInt);
-    public static final ModDataContainer.SynchedEntityDataContainer<Integer> ThrowColdDown =
-            new ModDataContainer.SynchedEntityDataContainer<>(GlovesThrowableProjectile.class, EntityDataSerializers.INT,
-                    "ThrowColdDown",
                     CompoundTag::putInt,
                     CompoundTag::getInt);
 
@@ -88,8 +86,6 @@ public abstract class GlovesThrowableProjectile extends Projectile implements It
                 ItemStack stack = this.getItem();
                 Player player = (Player) this.getOwner();
 
-                player.getCooldowns().addCooldown(
-                        stack.getItem(), Math.max(0, ThrowColdDown.get(this)-this.tickCount));
                 if (!player.getInventory().add(stack)) {
                     player.drop(stack, false);
                 }
@@ -109,11 +105,18 @@ public abstract class GlovesThrowableProjectile extends Projectile implements It
     }
 
     @Override
+    protected boolean canHitEntity(Entity target) {
+        return super.canHitEntity(target) && !this.getOwner().equals(target);
+    }
+
+    @Override
     protected void onHitEntity(EntityHitResult result) {
         super.onHitEntity(result);
         Vec3 curMotion = this.getDeltaMovement();
+        double curSpeed = curMotion.length();
+        if (!this.level().isClientSide && curSpeed>0.3) {projectileHurt(result);}
         Vec3 reflect = this.position().subtract(result.getEntity().position()).normalize()
-                .scale(curMotion.lengthSqr());
+                .scale(curSpeed);
         this.setDeltaMovement(curMotion.add(reflect).scale(0.2));
     }
 
@@ -126,7 +129,6 @@ public abstract class GlovesThrowableProjectile extends Projectile implements It
         }
     }
 
-
     @Override
     protected double getDefaultGravity() {
         return (5-LowGravityLevel.get(this))*0.01;
@@ -138,7 +140,6 @@ public abstract class GlovesThrowableProjectile extends Projectile implements It
 
         builder.define(CanPickUp.getAccessor(), false);
         builder.define(LowGravityLevel.getAccessor(), 0);
-        builder.define(ThrowColdDown.getAccessor(), 0);
         builder.define(InGround.getAccessor(), false);
     }
 
@@ -151,7 +152,6 @@ public abstract class GlovesThrowableProjectile extends Projectile implements It
         CanPickUp.saveNBT(this, nbt);
         InGround.saveNBT(this, nbt);
         LowGravityLevel.saveNBT(this, nbt);
-        ThrowColdDown.saveNBT(this, nbt);
     }
 
     @Override
@@ -165,7 +165,6 @@ public abstract class GlovesThrowableProjectile extends Projectile implements It
         CanPickUp.loadNBT(this, nbt);
         InGround.loadNBT(this, nbt);
         LowGravityLevel.loadNBT(this, nbt);
-        ThrowColdDown.loadNBT(this, nbt);
     }
 
     @Override
@@ -250,5 +249,20 @@ public abstract class GlovesThrowableProjectile extends Projectile implements It
 
     public ItemEntity spawnAtLocation() {
         return super.spawnAtLocation(this.getItem());
+    }
+
+    protected boolean projectileHurt(Entity target, DamageSource source, double damage, double speedMultipler){
+        if (target instanceof LivingEntity livingTarget) {
+            // knockback
+            livingTarget.knockback(0.5D, this.getDeltaMovement().x(), this.getDeltaMovement().z());
+
+            // handle damage
+            double speedSqr = this.getDeltaMovement().lengthSqr();
+            return livingTarget.hurt(source, (float) (damage+speedMultipler*speedSqr));
+        }
+        return false;
+    }
+    protected boolean projectileHurt(EntityHitResult result){
+        return this.projectileHurt(result.getEntity(), this.damageSources().generic(), 1, 0);
     }
 }

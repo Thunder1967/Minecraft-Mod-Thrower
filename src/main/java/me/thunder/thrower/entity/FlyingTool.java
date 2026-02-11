@@ -8,6 +8,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntityType;
@@ -31,18 +32,18 @@ import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import java.util.List;
 
 public class FlyingTool extends GlovesCanReturnProjectile {
-    public static final ModDataContainer.SynchedEntityDataContainer<Float> MoveDistance =
-            new ModDataContainer.SynchedEntityDataContainer<>(FlyingTool.class, EntityDataSerializers.FLOAT,
-                    "MoveDistance",
-                    CompoundTag::putFloat,
-                    CompoundTag::getFloat);
-
+    private final ItemStack gloves;
     public FlyingTool(EntityType<? extends FlyingTool> p_37442_, Level p_37443_) {
         super(p_37442_, p_37443_);
+        this.gloves = null;
     }
 
     public FlyingTool(LivingEntity livingEntity, Level level, ItemStack item, ItemStack gloves) {
         super(ModEntities.FLYING_TOOL.get(), livingEntity, level, item, gloves);
+        this.gloves = gloves;
+        if(livingEntity instanceof Player player){
+            player.getCooldowns().addCooldown(gloves.getItem(), 10);
+        }
     }
 
     @Override
@@ -83,15 +84,36 @@ public class FlyingTool extends GlovesCanReturnProjectile {
     @Override
     protected void onHitEntity(EntityHitResult result) {
         super.onHitEntity(result);
-        if(CanPickUp.get(this)) return;
-        ItemStack item = this.getItem();
+        if(this.getOwner() instanceof Player player && this.gloves!=null){
+            player.getCooldowns().addCooldown(this.gloves.getItem(), getThrowCoolDown());
+        }
+    }
 
+    private int getThrowCoolDown(){
+        ItemStack itemStack = this.getItem();
+        if(itemStack.is(ItemTags.SWORDS)){
+            return 20;
+        }
+        else if(itemStack.is(Items.MACE)){
+            return 40;
+        }
+        else{
+            return 30;
+        }
+    }
+
+    @Override
+    protected boolean projectileHurt(EntityHitResult result) {
+        if(CanPickUp.get(this)) return false;
         if (this.level() instanceof ServerLevel serverLevel &&
                 this.getOwner() instanceof Player player &&
                 result.getEntity() instanceof LivingEntity livingTarget) {
 
+            ItemStack item = this.getItem();
             DamageSource source = this.damageSources().playerAttack(player);
-            float baseDamage = 1f;
+            float baseDamage = 1;
+            double speedMultipler = 0;
+
             // apply effect
             if (player.hasEffect(MobEffects.DAMAGE_BOOST)) {
                 baseDamage += (player.getEffect(MobEffects.DAMAGE_BOOST).getAmplifier()+1) * 3.0F;
@@ -111,40 +133,22 @@ public class FlyingTool extends GlovesCanReturnProjectile {
 
             // custom special damage calculation
             if(item.is(Items.MACE)){
-                int densityLevel = EnchantmentHelper.getTagEnchantmentLevel(
-                        serverLevel.registryAccess()
-                                .lookupOrThrow(Registries.ENCHANTMENT)
-                                .getOrThrow(Enchantments.DENSITY),
-                        item
-                );
-                finalDamage += MoveDistance.get(this)/(5-densityLevel);
+                finalDamage += item.getItem().getAttackDamageBonus(livingTarget,0f,source);
             }
 
             // apply damage
-            if (livingTarget.hurt(source, finalDamage)){
+            if (this.projectileHurt(livingTarget,source,finalDamage,speedMultipler)){
                 EnchantmentHelper.doPostAttackEffectsWithItemSource(
                         serverLevel, livingTarget, source, item);
                 if(!player.getAbilities().instabuild) item.hurtAndBreak(1, serverLevel, player, (p) -> {});
+                return true;
             }
         }
+        return false;
     }
 
     @Override
-    protected void onHit(HitResult result) {
-        super.onHit(result);
-    }
-
-    @Override
-    public void tick() {
-        super.tick();
-        if (!this.level().isClientSide) {
-            MoveDistance.set(this,MoveDistance.get(this)+(float)this.getDeltaMovement().length());
-        }
-    }
-
-    @Override
-    protected void defineSynchedData(SynchedEntityData.Builder builder) {
-        super.defineSynchedData(builder);
-        builder.define(MoveDistance.getAccessor(),0f);
+    protected void applyDrag(double x) {
+        if(!this.noPhysics && !this.getItem().is(Items.MACE)) this.setDeltaMovement(this.getDeltaMovement().scale(x));
     }
 }

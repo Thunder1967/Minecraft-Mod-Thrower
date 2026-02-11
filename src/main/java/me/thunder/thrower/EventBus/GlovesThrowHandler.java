@@ -49,15 +49,18 @@ public class GlovesThrowHandler {
     private static boolean handleThrow(Player player,Level level,ItemStack item,ItemStack gloves){
         if (item.is(ModTags.Items.CanNotThrowByGloves)) return false;
         else if(item.isEmpty()){
-            level.playSound(
-                    player,
-                    player.getX(), player.getY(), player.getZ(),
-                    SoundEvents.SNOWBALL_THROW,
-                    SoundSource.PLAYERS,
-                    0.5F, 0.4F / (level.getRandom().nextFloat() * 0.4F + 0.8F)
-            );
-            player.setDeltaMovement(getThrowSpeed(player, gloves));
-            player.getCooldowns().addCooldown(gloves.getItem(),40);
+            var lookup = player.registryAccess().lookupOrThrow(Registries.ENCHANTMENT);
+            if(gloves.getEnchantmentLevel(lookup.getOrThrow(ModEnchantments.THROWSELF))>0){
+                level.playSound(
+                        player,
+                        player.getX(), player.getY(), player.getZ(),
+                        SoundEvents.SNOWBALL_THROW,
+                        SoundSource.PLAYERS,
+                        0.5F, 0.4F / (level.getRandom().nextFloat() * 0.4F + 0.8F)
+                );
+                player.setDeltaMovement(getThrowSpeed(player, gloves));
+                player.getCooldowns().addCooldown(gloves.getItem(),40);
+            }
         }
         else if (item.is(Items.TNT)){
             ThrowEntity(player,level,item,gloves, true,

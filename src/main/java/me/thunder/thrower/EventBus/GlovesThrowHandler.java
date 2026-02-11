@@ -25,19 +25,40 @@ import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 public class GlovesThrowHandler {
     @SubscribeEvent
     public static void onRightClickItem(PlayerInteractEvent.RightClickItem event) {
-        Player player = event.getEntity();
-        InteractionHand curHand = event.getHand();
-        InteractionHand otherHand = (curHand == InteractionHand.MAIN_HAND) ? InteractionHand.OFF_HAND : InteractionHand.MAIN_HAND;
-        ItemStack otherItem = player.getItemInHand(otherHand);
-        if(otherItem.is(ModItems.GLOVES.get()) &&
-                handleThrow(player,event.getLevel(),event.getItemStack(),otherItem)){
+        if(throwItemWithGloves(event)){
             event.setCancellationResult(InteractionResult.SUCCESS);
             event.setCanceled(true);
         }
     }
+    @SubscribeEvent
+    public static void onRightClickEmpty(PlayerInteractEvent.RightClickEmpty event){
+        throwItemWithGloves(event);
+    }
+
+    public static boolean throwItemWithGloves(PlayerInteractEvent event){
+        Player player = event.getEntity();
+        InteractionHand curHand = event.getHand();
+        InteractionHand otherHand = (curHand == InteractionHand.MAIN_HAND) ? InteractionHand.OFF_HAND : InteractionHand.MAIN_HAND;
+        ItemStack otherItem = player.getItemInHand(otherHand);
+        if(otherItem.is(ModItems.GLOVES.get()) && !player.getCooldowns().isOnCooldown(otherItem.getItem())){
+            return handleThrow(player,event.getLevel(),event.getItemStack(),otherItem);
+        }
+        return false;
+    }
 
     private static boolean handleThrow(Player player,Level level,ItemStack item,ItemStack gloves){
-        if (item.isEmpty() || item.is(ModTags.Items.CanNotThrowByGloves)) return false;
+        if (item.is(ModTags.Items.CanNotThrowByGloves)) return false;
+        else if(item.isEmpty()){
+            level.playSound(
+                    player,
+                    player.getX(), player.getY(), player.getZ(),
+                    SoundEvents.SNOWBALL_THROW,
+                    SoundSource.PLAYERS,
+                    0.5F, 0.4F / (level.getRandom().nextFloat() * 0.4F + 0.8F)
+            );
+            player.setDeltaMovement(getThrowSpeed(player, gloves));
+            player.getCooldowns().addCooldown(gloves.getItem(),40);
+        }
         else if (item.is(Items.TNT)){
             ThrowEntity(player,level,item,gloves, true,
                     (a,b,c,d) -> new PrimedTnt(b, a.getX(), a.getEyeY(), a.getZ(), a));
@@ -82,23 +103,22 @@ public class GlovesThrowHandler {
                 SoundSource.PLAYERS,
                 0.5F, 0.4F / (level.getRandom().nextFloat() * 0.4F + 0.8F)
         );
-        if(level instanceof ServerLevel serverLevel){
-            ItemStack stackCopy = item.copyWithCount(1);
-            T thrownEntity = factory.create(player,level,stackCopy,gloves);
+        ItemStack stackCopy = item.copyWithCount(1);
+        T thrownEntity = factory.create(player,level,stackCopy,gloves);
 
-            Vec3 lookAngle = player.getLookAngle();
-            double speed = 1 + EnchantmentHelper.getTagEnchantmentLevel(
-                    serverLevel.registryAccess()
-                            .lookupOrThrow(Registries.ENCHANTMENT)
-                            .getOrThrow(ModEnchantments.MUSCLE),
-                    gloves)*0.1;
-            thrownEntity.setDeltaMovement(lookAngle.scale(speed).add(player.getDeltaMovement()));
-            level.addFreshEntity(thrownEntity);
+        thrownEntity.setDeltaMovement(getThrowSpeed(player, gloves));
+        level.addFreshEntity(thrownEntity);
 
-            if (doShrink && !player.getAbilities().instabuild) {
-                item.shrink(1);
-            }
+        if (doShrink && !player.getAbilities().instabuild) {
+            item.shrink(1);
         }
+    }
+
+    private static Vec3 getThrowSpeed(Player player, ItemStack gloves){
+        Vec3 lookAngle = player.getLookAngle();
+        var lookup = player.registryAccess().lookupOrThrow(Registries.ENCHANTMENT);
+        double speed = 1 + 0.1*gloves.getEnchantmentLevel(lookup.getOrThrow(ModEnchantments.MUSCLE));
+        return lookAngle.scale(speed).add(player.getDeltaMovement());
     }
 
     @FunctionalInterface

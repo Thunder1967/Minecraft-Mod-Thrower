@@ -40,6 +40,7 @@ public class FlyingBlock extends GlovesThrowableProjectile {
     public FlyingBlock(LivingEntity owner, Level level, ItemStack item, ItemStack gloves) {
         super(ModEntities.FLYING_BLOCK.get(), owner,level, item, gloves);
         this.setBlockState(((BlockItem)item.getItem()).getBlock().defaultBlockState());
+        this.setPos(this.position().add(owner.getLookAngle().scale(2)));
     }
     @Override
     protected void defineSynchedData(SynchedEntityData.Builder builder) {

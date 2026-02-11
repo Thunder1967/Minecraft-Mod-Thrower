@@ -29,6 +29,8 @@ public class ModCreativeModeTabs {
                         getEnchantedBook(itemDisplayParameters,output, ModEnchantments.BOOMERANG);
                         getEnchantedBook(itemDisplayParameters,output, ModEnchantments.MUSCLE);
                         getEnchantedBook(itemDisplayParameters,output, ModEnchantments.LOWGRAVITY);
+                        getEnchantedBook(itemDisplayParameters,output, ModEnchantments.THROWSELF);
+                        getEnchantedBook(itemDisplayParameters,output, ModEnchantments.HOVER);
 
                     }).build());
     public static void register(IEventBus eventBus){

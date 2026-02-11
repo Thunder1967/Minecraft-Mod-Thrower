@@ -15,6 +15,8 @@ public class ModEnchantments {
     public static final ResourceKey<Enchantment> MUSCLE = createKey("muscle");
     public static final ResourceKey<Enchantment> BOOMERANG = createKey("boomerang");
     public static final ResourceKey<Enchantment> LOWGRAVITY = createKey("lowgravity");
+    public static final ResourceKey<Enchantment> THROWSELF = createKey("throwself");
+    public static final ResourceKey<Enchantment> HOVER = createKey("hover");
 
     public static void bootstrap(BootstrapContext<Enchantment> context) {
         HolderGetter<Item> itemRegistry = context.lookup(Registries.ITEM);
@@ -48,6 +50,27 @@ public class ModEnchantments {
                 Enchantment.dynamicCost(12,7),
                 Enchantment.dynamicCost(50,0),
                 2,
+                EquipmentSlotGroup.ANY))
+        );
+
+        register(context, THROWSELF,Enchantment.enchantment(Enchantment.definition(
+                itemRegistry.getOrThrow(ModTags.Items.GLOVES_ENCHANTABLE),
+                itemRegistry.getOrThrow(ModTags.Items.GLOVES_ENCHANTABLE),
+                2,
+                1,
+                Enchantment.dynamicCost(25,25),
+                Enchantment.dynamicCost(75,25),
+                8,
+                EquipmentSlotGroup.ANY))
+        );
+        register(context, HOVER,Enchantment.enchantment(Enchantment.definition(
+                itemRegistry.getOrThrow(ModTags.Items.GLOVES_ENCHANTABLE),
+                itemRegistry.getOrThrow(ModTags.Items.GLOVES_ENCHANTABLE),
+                2,
+                1,
+                Enchantment.dynamicCost(25,25),
+                Enchantment.dynamicCost(75,25),
+                16,
                 EquipmentSlotGroup.ANY))
         );
     }

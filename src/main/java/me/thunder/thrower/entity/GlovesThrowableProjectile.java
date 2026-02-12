@@ -7,6 +7,7 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.*;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.ItemTags;
@@ -58,6 +59,11 @@ public abstract class GlovesThrowableProjectile extends Projectile implements It
         this.setPos(owner.getX(), owner.getEyeY()-0.1, owner.getZ());
         this.setItem(item);
         this.setOwner(owner);
+
+        //handle durability damage
+        if(level instanceof ServerLevel serverLevel && owner instanceof Player player && !player.getAbilities().instabuild){
+            gloves.hurtAndBreak(1, serverLevel, player, (p) -> {});
+        }
 
         // get enchantment
         var lookup = owner.registryAccess().lookupOrThrow(Registries.ENCHANTMENT);

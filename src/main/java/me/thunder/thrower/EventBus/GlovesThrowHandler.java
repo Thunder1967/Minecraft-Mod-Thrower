@@ -16,7 +16,6 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.item.PrimedTnt;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.*;
-import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -30,38 +29,42 @@ public class GlovesThrowHandler {
             event.setCanceled(true);
         }
     }
-    @SubscribeEvent
-    public static void onRightClickEmpty(PlayerInteractEvent.RightClickEmpty event){
-        throwItemWithGloves(event);
-    }
 
     public static boolean throwItemWithGloves(PlayerInteractEvent event){
         Player player = event.getEntity();
         InteractionHand curHand = event.getHand();
+        ItemStack curItem = event.getItemStack();
         InteractionHand otherHand = (curHand == InteractionHand.MAIN_HAND) ? InteractionHand.OFF_HAND : InteractionHand.MAIN_HAND;
         ItemStack otherItem = player.getItemInHand(otherHand);
-        if(otherItem.is(ModItems.GLOVES.get()) && !player.getCooldowns().isOnCooldown(otherItem.getItem())){
-            return handleThrow(player,event.getLevel(),event.getItemStack(),otherItem);
+        if(!player.getCooldowns().isOnCooldown(otherItem.getItem())){
+            if(otherItem.is(ModItems.GLOVES.get())){
+                return handleThrow(player,event.getLevel(),curItem,otherItem);
+            }
+            else if(curItem.is(ModItems.GLOVES.get()) && otherItem.isEmpty()){
+                event.getLevel().playSound(
+                        player,
+                        player.getX(), player.getY(), player.getZ(),
+                        SoundEvents.SNOWBALL_THROW,
+                        SoundSource.PLAYERS,
+                        0.5F, 0.4F / (event.getLevel().getRandom().nextFloat() * 0.4F + 0.8F)
+                );
+                var lookup = player.registryAccess().lookupOrThrow(Registries.ENCHANTMENT);
+                if(curItem.getEnchantmentLevel(lookup.getOrThrow(ModEnchantments.THROWSELF))>0){
+                    player.setDeltaMovement(getThrowSpeed(player, curItem));
+                    player.getCooldowns().addCooldown(curItem.getItem(),40);
+                    //handle durability damage
+                    if(event.getLevel() instanceof ServerLevel serverLevel && !player.getAbilities().instabuild){
+                        curItem.hurtAndBreak(4, serverLevel, player, (p) -> {});
+                    }
+                }
+                return true;
+            }
         }
         return false;
     }
 
     private static boolean handleThrow(Player player,Level level,ItemStack item,ItemStack gloves){
-        if (item.is(ModTags.Items.CanNotThrowByGloves)) return false;
-        else if(item.isEmpty()){
-            var lookup = player.registryAccess().lookupOrThrow(Registries.ENCHANTMENT);
-            if(gloves.getEnchantmentLevel(lookup.getOrThrow(ModEnchantments.THROWSELF))>0){
-                level.playSound(
-                        player,
-                        player.getX(), player.getY(), player.getZ(),
-                        SoundEvents.SNOWBALL_THROW,
-                        SoundSource.PLAYERS,
-                        0.5F, 0.4F / (level.getRandom().nextFloat() * 0.4F + 0.8F)
-                );
-                player.setDeltaMovement(getThrowSpeed(player, gloves));
-                player.getCooldowns().addCooldown(gloves.getItem(),40);
-            }
-        }
+        if (item.isEmpty() || item.is(ModTags.Items.CanNotThrowByGloves)) return false;
         else if (item.is(Items.TNT)){
             ThrowEntity(player,level,item,gloves, true,
                     (a,b,c,d) -> new PrimedTnt(b, a.getX(), a.getEyeY(), a.getZ(), a));

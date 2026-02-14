@@ -3,6 +3,7 @@
   "description": {
     "translate": "enchantment.thrower.throwself"
   },
+  "exclusive_set": "#thrower:exclusive_set/glove_hover_exclusive",
   "max_cost": {
     "base": 75,
     "per_level_above_first": 25

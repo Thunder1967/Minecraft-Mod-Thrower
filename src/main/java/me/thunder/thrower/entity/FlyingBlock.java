@@ -29,6 +29,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.Vec3;
 
 public class FlyingBlock extends GlovesThrowableProjectile {
     private static final EntityDataAccessor<BlockState> DataBlockState =
@@ -126,7 +127,7 @@ public class FlyingBlock extends GlovesThrowableProjectile {
     }
 
     @Override
-    protected void applyDrag(double x) {
-        if(!this.noPhysics && !this.getItem().is(ItemTags.ANVIL)) this.setDeltaMovement(this.getDeltaMovement().scale(x));
+    protected boolean isNoDrag() {
+        return super.isNoDrag() || this.getItem().is(ItemTags.ANVIL);
     }
 }

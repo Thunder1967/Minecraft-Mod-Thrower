@@ -38,8 +38,11 @@ public abstract class ModDataContainer {
             super.saveNBT(nbt, get(entity));
         }
 
-        public void loadNBT(Entity entity, CompoundTag nbt) {
-            super.loadNBT(nbt).ifPresent((x)-> set(entity, x));
+        public Optional<T> loadNBT(Entity entity, CompoundTag nbt) {
+            return super.loadNBT(nbt).map((x)-> {
+                set(entity, x);
+                return x;
+            });
         }
     }
 

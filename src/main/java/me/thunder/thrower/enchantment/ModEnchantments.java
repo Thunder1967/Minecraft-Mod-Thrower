@@ -7,6 +7,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.data.worldgen.BootstrapContext;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.EnchantmentTags;
 import net.minecraft.world.entity.EquipmentSlotGroup;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.enchantment.Enchantment;
@@ -20,6 +21,8 @@ public class ModEnchantments {
 
     public static void bootstrap(BootstrapContext<Enchantment> context) {
         HolderGetter<Item> itemRegistry = context.lookup(Registries.ITEM);
+        var enchantments = context.lookup(Registries.ENCHANTMENT);
+
         register(context, MUSCLE,Enchantment.enchantment(Enchantment.definition(
             itemRegistry.getOrThrow(ModTags.Items.GLOVES_ENCHANTABLE),
             itemRegistry.getOrThrow(ModTags.Items.GLOVES_ENCHANTABLE),
@@ -62,6 +65,7 @@ public class ModEnchantments {
                 Enchantment.dynamicCost(75,25),
                 8,
                 EquipmentSlotGroup.ANY))
+                .exclusiveWith(enchantments.getOrThrow(ModTags.Enchantments.GLOVE_HOVER_EXCLUSIVE))
         );
         register(context, HOVER,Enchantment.enchantment(Enchantment.definition(
                 itemRegistry.getOrThrow(ModTags.Items.GLOVES_ENCHANTABLE),
@@ -72,6 +76,7 @@ public class ModEnchantments {
                 Enchantment.dynamicCost(75,25),
                 16,
                 EquipmentSlotGroup.ANY))
+                .exclusiveWith(enchantments.getOrThrow(ModTags.Enchantments.GLOVE_HOVER_EXCLUSIVE))
         );
     }
 

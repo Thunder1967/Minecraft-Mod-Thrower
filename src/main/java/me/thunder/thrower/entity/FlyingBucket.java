@@ -42,6 +42,7 @@ public class FlyingBucket extends GlovesCanReturnProjectile {
                         CanPickUp.set(this,true);
                         if(canReturn()){
                             this.noPhysics = true;
+                            this.setNoGravity(true);
                         }
                         return;
                     }

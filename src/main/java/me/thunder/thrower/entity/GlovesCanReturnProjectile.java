@@ -39,7 +39,7 @@ public abstract class GlovesCanReturnProjectile extends GlovesThrowableProjectil
     @Override
     public void tick() {
         super.tick();
-        if(this.canReturn() && CanPickUp.get(this)){
+        if(isReturning()){
             Entity owner = this.getOwner();
 
             // if owner die, drop as item
@@ -57,7 +57,6 @@ public abstract class GlovesCanReturnProjectile extends GlovesThrowableProjectil
             double speed = Math.min(-1+(BoomerangLevel.get(this)*2),(returnTimer * 0.1));
             this.setDeltaMovement(direction.scale(speed*0.6).add(this.getDeltaMovement().scale(0.4)));
             returnTimer++;
-            simpleMove();
         }
     }
 
@@ -68,6 +67,7 @@ public abstract class GlovesCanReturnProjectile extends GlovesThrowableProjectil
             CanPickUp.set(this,true);
             if(canReturn()){
                 this.noPhysics = true;
+                this.setNoGravity(true);
             }
         }
     }
@@ -99,5 +99,9 @@ public abstract class GlovesCanReturnProjectile extends GlovesThrowableProjectil
 
     public boolean canReturn(){
         return BoomerangLevel.get(this)>0;
+    }
+
+    public boolean isReturning(){
+        return this.canReturn() && CanPickUp.get(this);
     }
 }

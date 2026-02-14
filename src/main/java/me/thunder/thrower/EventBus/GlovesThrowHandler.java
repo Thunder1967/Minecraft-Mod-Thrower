@@ -4,6 +4,7 @@ import me.thunder.thrower.enchantment.ModEnchantments;
 import me.thunder.thrower.entity.*;
 import me.thunder.thrower.item.MobNetItem;
 import me.thunder.thrower.item.ModItems;
+import me.thunder.thrower.util.ModDataAttachments;
 import me.thunder.thrower.util.ModTags;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.server.level.ServerLevel;
@@ -41,21 +42,26 @@ public class GlovesThrowHandler {
                 return handleThrow(player,event.getLevel(),curItem,otherItem);
             }
             else if(curItem.is(ModItems.GLOVES.get()) && otherItem.isEmpty()){
-                event.getLevel().playSound(
-                        player,
-                        player.getX(), player.getY(), player.getZ(),
-                        SoundEvents.SNOWBALL_THROW,
-                        SoundSource.PLAYERS,
-                        0.5F, 0.4F / (event.getLevel().getRandom().nextFloat() * 0.4F + 0.8F)
-                );
                 var lookup = player.registryAccess().lookupOrThrow(Registries.ENCHANTMENT);
                 if(curItem.getEnchantmentLevel(lookup.getOrThrow(ModEnchantments.THROWSELF))>0){
+                    event.getLevel().playSound(
+                            player,
+                            player.getX(), player.getY(), player.getZ(),
+                            SoundEvents.SNOWBALL_THROW,
+                            SoundSource.PLAYERS,
+                            0.5F, 0.4F / (event.getLevel().getRandom().nextFloat() * 0.4F + 0.8F)
+                    );
                     player.setDeltaMovement(getThrowSpeed(player, curItem));
                     player.getCooldowns().addCooldown(curItem.getItem(),40);
                     //handle durability damage
                     if(event.getLevel() instanceof ServerLevel serverLevel && !player.getAbilities().instabuild){
                         curItem.hurtAndBreak(4, serverLevel, player, (p) -> {});
                     }
+                }
+                else if(curItem.getEnchantmentLevel(lookup.getOrThrow(ModEnchantments.HOVER))>0){
+                    var attach = ModDataAttachments.HOVER_PROJECTILE_DASH_TRIGGER;
+                    player.setData(attach, Math.max(0,player.getData(attach)-5));
+//                    player.setData(attach, 0);
                 }
                 return true;
             }
@@ -75,7 +81,8 @@ public class GlovesThrowHandler {
             ThrowEntity(player,level,item,gloves, true, FlyingItem::new);
         }
         else if (item.getItem() instanceof DispensibleContainerItem || item.is(Items.BUCKET)) {
-            ThrowEntity(player,level,item,gloves, true, FlyingBucket::new);
+            ThrowEntity(player,level,item,gloves, false, FlyingBucket::new);
+            item.shrink(1);
         }
         else if(item.getItem() instanceof DiggerItem ||
                 item.getItem() instanceof SwordItem ||

@@ -124,11 +124,11 @@ public abstract class GlovesThrowableProjectile extends Projectile implements It
                 bodyVec = bodyVec.normalize();
                 Vec3 localPos = this.position().subtract(this.getOwner().position());
                 double projectVal = bodyVec.dot(localPos);
-                if(Math.abs(projectVal)<0.7){
-                    this.setPos(this.position().add(bodyVec));
+                if(projectVal<0){
+                    this.setPos(this.position().add(bodyVec.scale(-2*projectVal)));
                 }
-                else if(projectVal<0){
-                    this.setPos(this.position().add(bodyVec).scale(-2*projectVal));
+                if(Math.abs(projectVal)<0.5){
+                    this.setPos(this.position().add(bodyVec));
                 }
 
                 HoverID.set(this,-1);

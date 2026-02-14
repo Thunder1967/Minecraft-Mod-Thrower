@@ -61,7 +61,6 @@ public class GlovesThrowHandler {
                 else if(curItem.getEnchantmentLevel(lookup.getOrThrow(ModEnchantments.HOVER))>0){
                     var attach = ModDataAttachments.HOVER_PROJECTILE_DASH_TRIGGER;
                     player.setData(attach, Math.max(0,player.getData(attach)-5));
-//                    player.setData(attach, 0);
                 }
                 return true;
             }
@@ -71,15 +70,6 @@ public class GlovesThrowHandler {
 
     private static boolean handleThrow(Player player,Level level,ItemStack item,ItemStack gloves){
         if (item.isEmpty() || item.is(ModTags.Items.CanNotThrowByGloves)) return false;
-        else if (item.is(Items.TNT)){
-            ThrowEntity(player,level,item,gloves, true,
-                    (a,b,c,d) -> new PrimedTnt(b, a.getX(), a.getEyeY(), a.getZ(), a));
-        }
-        else if (item.getItem() instanceof SpawnEggItem ||
-                item.is(Items.FIRE_CHARGE) ||
-                item.is(Items.END_CRYSTAL)) {
-            ThrowEntity(player,level,item,gloves, true, FlyingItem::new);
-        }
         else if (item.getItem() instanceof DispensibleContainerItem || item.is(Items.BUCKET)) {
             ThrowEntity(player,level,item,gloves, false, FlyingBucket::new);
             item.shrink(1);
@@ -97,13 +87,7 @@ public class GlovesThrowHandler {
             ThrowEntity(player,level,item,gloves, true, MobNetEntity::new);
         }
         else{
-            ThrowEntity(player,level,item,gloves, true,
-                    (a,b,c,d)->{
-                        ItemEntity thrownEntity = new ItemEntity(b,a.getX(), a.getEyeY(), a.getZ(),c);
-                        thrownEntity.setPickUpDelay(40);
-                        thrownEntity.hasImpulse = true;
-                        return thrownEntity;
-            });
+            ThrowEntity(player,level,item,gloves, true, FlyingItem::new);
         }
         return true;
     }

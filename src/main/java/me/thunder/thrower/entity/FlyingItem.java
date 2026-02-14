@@ -22,7 +22,7 @@ public class FlyingItem extends GlovesThrowableProjectile {
     @Override
     protected void onHit(HitResult result) {
         super.onHit(result);
-        if(this.level().isClientSide) return;
+        if(this.level().isClientSide || this.CanPickUp.get(this)) return;
         ItemStack itemStack = this.getItem();
         Item item = itemStack.getItem();
         if (item instanceof SpawnEggItem eggItem){
@@ -45,8 +45,21 @@ public class FlyingItem extends GlovesThrowableProjectile {
 
                 this.level().addFreshEntity(entity);
             }
+            this.discard();
         }
         else if (itemStack.is(Items.FIRE_CHARGE)){
+            this.level().explode(
+                    this,
+                    this.damageSources().explosion(this, this.getOwner()),
+                    null,
+                    this.getX(), this.getY(), this.getZ(),
+                    1,
+                    true,
+                    Level.ExplosionInteraction.BLOCK
+            );
+            this.discard();
+        }
+        else if (itemStack.is(Items.END_CRYSTAL)){
             this.level().explode(
                     this,
                     this.damageSources().explosion(this, this.getOwner()),
@@ -56,22 +69,11 @@ public class FlyingItem extends GlovesThrowableProjectile {
                     true,
                     Level.ExplosionInteraction.BLOCK
             );
+            this.discard();
         }
-        else if (itemStack.is(Items.END_CRYSTAL)){
-            this.level().explode(
-                    this,
-                    this.damageSources().explosion(this, this.getOwner()),
-                    null,
-                    this.getX(), this.getY(), this.getZ(),
-                    10,
-                    true,
-                    Level.ExplosionInteraction.BLOCK
-            );
+        else {
+            this.CanPickUp.set(this,true);
         }
-        else{
-            this.spawnAtLocation(itemStack);
-        }
-        this.discard();
     }
     @Override
     protected void defineSynchedData(SynchedEntityData.Builder builder) {

@@ -1,7 +1,6 @@
 package me.thunder.thrower;
 
 import com.mojang.logging.LogUtils;
-import me.thunder.thrower.EventBus.GlovesThrowHandler;
 import me.thunder.thrower.entity.ModEntities;
 import me.thunder.thrower.entity.client.FlyingBlockRenderer;
 import me.thunder.thrower.entity.client.FlyingToolRenderer;
@@ -50,7 +49,6 @@ public class Thrower {
         modContainer.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
 
         //custom
-        NeoForge.EVENT_BUS.register(GlovesThrowHandler.class);
         ModEntities.register(modEventBus);
         ModItems.register(modEventBus);
         ModDataComponents.register(modEventBus);

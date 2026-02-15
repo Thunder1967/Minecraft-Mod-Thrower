@@ -71,6 +71,18 @@ public class FlyingItem extends GlovesThrowableProjectile {
             );
             this.discard();
         }
+        else if (itemStack.is(Items.TNT)){
+            this.level().explode(
+                    this,
+                    this.damageSources().explosion(this, this.getOwner()),
+                    null,
+                    this.getX(), this.getY(), this.getZ(),
+                    4,
+                    false,
+                    Level.ExplosionInteraction.BLOCK
+            );
+            this.discard();
+        }
         else {
             this.CanPickUp.set(this,true);
         }

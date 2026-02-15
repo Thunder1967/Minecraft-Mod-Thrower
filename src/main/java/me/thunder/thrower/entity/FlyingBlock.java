@@ -8,6 +8,7 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.ItemTags;
@@ -29,7 +30,8 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
-import net.minecraft.world.phys.Vec3;
+import net.neoforged.neoforge.common.util.FakePlayer;
+import net.neoforged.neoforge.common.util.FakePlayerFactory;
 
 public class FlyingBlock extends GlovesThrowableProjectile {
     private static final EntityDataAccessor<BlockState> DataBlockState =
@@ -40,8 +42,9 @@ public class FlyingBlock extends GlovesThrowableProjectile {
     }
     public FlyingBlock(LivingEntity owner, Level level, ItemStack item, ItemStack gloves) {
         super(ModEntities.FLYING_BLOCK.get(), owner,level, item, gloves);
-        this.setBlockState(((BlockItem)item.getItem()).getBlock().defaultBlockState());
-        this.setPos(this.position().add(owner.getLookAngle().scale(2)));
+        this.setBlockState(((BlockItem)this.getItem().getItem()).getBlock().defaultBlockState());
+        // avoid entity too closing to player
+        simpleMove();
     }
     @Override
     protected void defineSynchedData(SynchedEntityData.Builder builder) {
@@ -65,10 +68,12 @@ public class FlyingBlock extends GlovesThrowableProjectile {
     @Override
     protected void onHitBlock(BlockHitResult result) {
         super.onHitBlock(result);
-        if (!this.level().isClientSide) {
-            Player player = this.getOwner() instanceof Player p ? p : null;
+        if (this.level() instanceof ServerLevel serverLevel) {
             ItemStack item = this.getItem();
-            UseOnContext context = new UseOnContext(player, InteractionHand.MAIN_HAND, result);
+            // use fakePlayer to avoid repeatedly shrinking item
+            FakePlayer fakePlayer = FakePlayerFactory.getMinecraft(serverLevel);
+            fakePlayer.setPos(this.position());
+            UseOnContext context = new UseOnContext(fakePlayer, InteractionHand.MAIN_HAND, result);
             InteractionResult res = item.getItem().useOn(context);
             if(res == InteractionResult.PASS || res == InteractionResult.FAIL){
                 this.spawnAtLocation();

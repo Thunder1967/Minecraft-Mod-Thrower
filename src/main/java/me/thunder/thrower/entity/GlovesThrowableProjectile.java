@@ -28,6 +28,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.*;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.neoforged.neoforge.event.EventHooks;
+import net.neoforged.neoforge.fluids.FluidType;
 
 import java.util.Optional;
 
@@ -246,6 +247,16 @@ public abstract class GlovesThrowableProjectile extends Projectile implements It
 
         d0 *= 64.0F;
         return distance < d0 * d0;
+    }
+
+    @Override
+    public boolean isPushable() {
+        return this.noPhysics; // 防止被其他實體推動
+    }
+
+    @Override
+    public boolean isPushedByFluid(FluidType type) {
+        return this.noPhysics;
     }
 
     protected void simpleMove(){

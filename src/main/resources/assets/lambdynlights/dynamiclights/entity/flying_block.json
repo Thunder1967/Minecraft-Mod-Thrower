@@ -1,0 +1,11 @@
+{
+  "match": {
+    "type": [
+      "thrower:flying_block"
+    ]
+  },
+  "luminance": {
+    "type": "thrower:custom_entity_luminance",
+    "invert": false
+  }
+}

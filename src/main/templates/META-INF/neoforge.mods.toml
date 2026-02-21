@@ -77,3 +77,12 @@ side = "BOTH"
 # stop your mod loading on the server for example.
 #[features."${mod_id}"]
 #openGLVersion="[3.2,)"
+
+[[dependencies."${mod_id}"]]
+modId="lambdynlights"
+type="optional"
+ordering="AFTER"
+side="BOTH"
+
+[modproperties.thrower."yumi:entrypoints"]
+"lambdynlights:initializer" = "me.thunder.thrower.lambdynamiclights.Initializer"

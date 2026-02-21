@@ -11,6 +11,10 @@ group = mod_group_id
 repositories {
     mavenLocal()
     maven { url = "https://api.modrinth.com/maven" }
+    maven {
+        name = "Gegy"
+        url = uri("https://maven.gegy.dev")
+    }
 }
 
 base {
@@ -96,11 +100,36 @@ neoForge {
 sourceSets.main.resources { srcDir 'src/generated/resources' }
 
 
+
+def mappingsAttribute = Attribute.of("net.minecraft.mappings", String)
 dependencies {
     runtimeOnly "maven.modrinth:jade:15.10.4+neoforge"
     runtimeOnly "maven.modrinth:damagenumbers:1.4.1-neoforge"
 //    runtimeOnly "maven.modrinth:just-zoom:2.1.0-1.21.1-neoforge"
     runtimeOnly "maven.modrinth:konkrete:1.9.9-1.21-neoforge"
+
+    // LambDynamicLights
+    attributesSchema {
+        attribute(mappingsAttribute)
+    }
+
+    // The API of LambDynamicLights.
+    // This is only required for compilation if you're using the Java API.
+    compileOnly("dev.lambdaurora.lambdynamiclights:lambdynamiclights-api:${lamb_dynamic_lights_version}") {
+        attributes {
+            attribute(mappingsAttribute, "mojmap")
+        }
+    }
+
+    // For runtime of LambDynamicLights.
+    // Include only if you need to test in your dev env compatibility with LambDynamicLights.
+    // Replace with runtimeOnly if you want the dependency to be transitive.
+    runtimeOnly("dev.lambdaurora.lambdynamiclights:lambdynamiclights-runtime:${lamb_dynamic_lights_version}") {
+        attributes {
+            attribute(mappingsAttribute, "mojmap")
+        }
+    }
+
     // Example mod dependency with JEI
     // The JEI API is declared for compile time use, while the full JEI artifact is used at runtime
     // compileOnly "mezz.jei:jei-${mc_version}-common-api:${jei_version}"

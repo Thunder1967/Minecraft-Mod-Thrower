@@ -13,6 +13,7 @@ public class ModTags {
     public static class Items {
         public static final TagKey<Item> CanNotThrowByGloves = createTag("can_not_throw_by_gloves");
         public static final TagKey<Item> GLOVES_ENCHANTABLE = createTag("gloves_enchantable");
+        public static final TagKey<Item> QUICKTHROW_ENCHANTABLE = createTag("quickthrow_enchantable");
 
         private static TagKey<Item> createTag(String name) {
             return ItemTags.create(ResourceLocation.fromNamespaceAndPath(Thrower.MODID, name));

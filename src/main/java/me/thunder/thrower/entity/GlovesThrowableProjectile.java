@@ -196,7 +196,7 @@ public abstract class GlovesThrowableProjectile extends Projectile implements It
 
     @Override
     protected double getDefaultGravity() {
-        return (5-LowGravityLevel.get(this))*0.01;
+        return Mth.clamp((5-LowGravityLevel.get(this))*0.01f,0f,10f);
     }
 
     @Override

@@ -7,7 +7,6 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.data.worldgen.BootstrapContext;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.EnchantmentTags;
 import net.minecraft.world.entity.EquipmentSlotGroup;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.enchantment.Enchantment;
@@ -18,6 +17,7 @@ public class ModEnchantments {
     public static final ResourceKey<Enchantment> LOWGRAVITY = createKey("lowgravity");
     public static final ResourceKey<Enchantment> THROWSELF = createKey("throwself");
     public static final ResourceKey<Enchantment> HOVER = createKey("hover");
+    public static final ResourceKey<Enchantment> QUICKTHROW = createKey("quickthrow");
 
     public static void bootstrap(BootstrapContext<Enchantment> context) {
         HolderGetter<Item> itemRegistry = context.lookup(Registries.ITEM);
@@ -77,6 +77,16 @@ public class ModEnchantments {
                 16,
                 EquipmentSlotGroup.ANY))
                 .exclusiveWith(enchantments.getOrThrow(ModTags.Enchantments.GLOVE_HOVER_EXCLUSIVE))
+        );
+        register(context, QUICKTHROW,Enchantment.enchantment(Enchantment.definition(
+                itemRegistry.getOrThrow(ModTags.Items.QUICKTHROW_ENCHANTABLE),
+                itemRegistry.getOrThrow(ModTags.Items.GLOVES_ENCHANTABLE),
+                6,
+                4,
+                Enchantment.dynamicCost(1,11),
+                Enchantment.dynamicCost(21,11),
+                2,
+                EquipmentSlotGroup.ANY))
         );
     }
 

@@ -31,6 +31,7 @@ public class ModCreativeModeTabs {
                         getEnchantedBook(itemDisplayParameters,output, ModEnchantments.LOWGRAVITY);
                         getEnchantedBook(itemDisplayParameters,output, ModEnchantments.THROWSELF);
                         getEnchantedBook(itemDisplayParameters,output, ModEnchantments.HOVER);
+                        getEnchantedBook(itemDisplayParameters,output, ModEnchantments.QUICKTHROW);
 
                     }).build());
     public static void register(IEventBus eventBus){

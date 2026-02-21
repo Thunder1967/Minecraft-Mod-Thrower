@@ -23,18 +23,22 @@ public class ModItemTagProvider extends ItemTagsProvider {
     @SuppressWarnings("unchecked")
     @Override
     protected void addTags(HolderLookup.Provider provider) {
-        this.tag(ModTags.Items.CanNotThrowByGloves)
-                .addTags(Tags.Items.FOODS)
-                .add(Items.EGG)
-                .add(Items.SNOWBALL)
-                .add(Items.EXPERIENCE_BOTTLE)
-                .add(Items.FIREWORK_ROCKET)
-                .add(Items.LINGERING_POTION)
-                .add(Items.SPLASH_POTION)
-                .add(Items.WIND_CHARGE)
-                .add(Items.TRIDENT);
+        this.tag(ModTags.Items.CanNotThrowByGloves);
+//                .addTags(Tags.Items.FOODS)
+//                .add(Items.EGG)
+//                .add(Items.SNOWBALL)
+//                .add(Items.EXPERIENCE_BOTTLE)
+//                .add(Items.FIREWORK_ROCKET)
+//                .add(Items.LINGERING_POTION)
+//                .add(Items.SPLASH_POTION)
+//                .add(Items.WIND_CHARGE)
+//                .add(Items.TRIDENT);
 
         this.tag(ModTags.Items.GLOVES_ENCHANTABLE)
                 .add(ModItems.GLOVES.get());
+
+        this.tag(ModTags.Items.QUICKTHROW_ENCHANTABLE)
+                .addTags(ModTags.Items.GLOVES_ENCHANTABLE)
+                .add(Items.TRIDENT);
     }
 }

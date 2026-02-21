@@ -106,11 +106,6 @@ public class Gloves extends Item {
         }
     }
 
-    @Override
-    public void onUseTick(Level level, LivingEntity entity, ItemStack stack, int timeLeft) {
-        int duration = this.getUseDuration(stack, entity) - timeLeft;
-    }
-
     public GlovesState getState(ItemStack itemStack){
         return GlovesState.values()[itemStack.getOrDefault(ModDataComponents.GLOVES_STATE,GlovesState.DEFAULT.ordinal())];
     }

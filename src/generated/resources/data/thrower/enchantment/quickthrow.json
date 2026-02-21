@@ -1,0 +1,21 @@
+{
+  "anvil_cost": 2,
+  "description": {
+    "translate": "enchantment.thrower.quickthrow"
+  },
+  "max_cost": {
+    "base": 21,
+    "per_level_above_first": 11
+  },
+  "max_level": 4,
+  "min_cost": {
+    "base": 1,
+    "per_level_above_first": 11
+  },
+  "primary_items": "#thrower:gloves_enchantable",
+  "slots": [
+    "any"
+  ],
+  "supported_items": "#thrower:quickthrow_enchantable",
+  "weight": 6
+}

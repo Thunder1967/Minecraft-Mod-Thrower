@@ -32,7 +32,7 @@ public class ModEntities {
             ENTITY_TYPES.register("flying_block", () -> EntityType.Builder.<FlyingBlock>of(FlyingBlock::new, MobCategory.MISC)
                     .sized(0.8F, 0.8F)
                     .clientTrackingRange(4)
-                    .updateInterval(2)
+                    .updateInterval(10)
                     .fireImmune()
                     .build("flying_block"));
 
@@ -40,7 +40,7 @@ public class ModEntities {
             ENTITY_TYPES.register("flying_tool", () -> EntityType.Builder.<FlyingTool>of(FlyingTool::new, MobCategory.MISC)
                     .sized(0.5F, 0.5F)
                     .clientTrackingRange(4)
-                    .updateInterval(2)
+                    .updateInterval(10)
                     .fireImmune()
                     .build("flying_tool"));
 
@@ -48,7 +48,7 @@ public class ModEntities {
             ENTITY_TYPES.register("mob_net_entity", () -> EntityType.Builder.<MobNetEntity>of(MobNetEntity::new, MobCategory.MISC)
                     .sized(0.5F, 0.5F)
                     .clientTrackingRange(4)
-                    .updateInterval(2)
+                    .updateInterval(10)
                     .fireImmune()
                     .build("mob_net_entity"));
 

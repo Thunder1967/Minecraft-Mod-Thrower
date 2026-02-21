@@ -1,0 +1,20 @@
+{
+  "values": [
+    {
+      "id": "thrower:muscle",
+      "required": false
+    },
+    {
+      "id": "thrower:boomerang",
+      "required": false
+    },
+    {
+      "id": "thrower:quickthrow",
+      "required": false
+    },
+    {
+      "id": "thrower:lowgravity",
+      "required": false
+    }
+  ]
+}

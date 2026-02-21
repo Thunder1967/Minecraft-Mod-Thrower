@@ -251,12 +251,13 @@ public abstract class GlovesThrowableProjectile extends Projectile implements It
 
     @Override
     public boolean isPushable() {
-        return this.noPhysics; // 防止被其他實體推動
+        // Preventing being pushed by other entities
+        return this.noPhysics || this.isNoGravity();
     }
 
     @Override
     public boolean isPushedByFluid(FluidType type) {
-        return this.noPhysics;
+        return this.noPhysics || this.isNoGravity();
     }
 
     protected void simpleMove(){

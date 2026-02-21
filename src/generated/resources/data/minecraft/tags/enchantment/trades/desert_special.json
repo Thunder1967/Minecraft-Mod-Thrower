@@ -1,0 +1,8 @@
+{
+  "values": [
+    {
+      "id": "thrower:throwself",
+      "required": false
+    }
+  ]
+}

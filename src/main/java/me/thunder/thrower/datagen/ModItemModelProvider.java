@@ -20,5 +20,6 @@ public class ModItemModelProvider extends ItemModelProvider {
                 .texture("particle", modLoc("entity/mob_net"));
 
         basicItem(ModItems.GLOVES.get());
+        basicItem(ModItems.NETHERITE_GLOVES.get());
     }
 }

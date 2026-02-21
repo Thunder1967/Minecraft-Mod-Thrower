@@ -21,10 +21,10 @@ public class ModTags {
     }
 
     public static class Enchantments{
-        public static final TagKey<Enchantment> GLOVE_HOVER_EXCLUSIVE = createTag("glove_hover_exclusive");
+        public static final TagKey<Enchantment> GLOVE_HOVER_EXCLUSIVE = createTag("exclusive_set/glove_hover_exclusive");
 
         private static TagKey<Enchantment> createTag(String name) {
-            return TagKey.create(Registries.ENCHANTMENT,ResourceLocation.fromNamespaceAndPath(Thrower.MODID, "exclusive_set/"+name));
+            return TagKey.create(Registries.ENCHANTMENT,ResourceLocation.fromNamespaceAndPath(Thrower.MODID, name));
         }
     }
 }

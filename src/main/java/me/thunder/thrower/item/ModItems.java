@@ -1,6 +1,7 @@
 package me.thunder.thrower.item;
 
 import me.thunder.thrower.Thrower;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.Item;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredItem;
@@ -15,9 +16,15 @@ public class ModItems {
             ));
 
     public static final DeferredItem<Gloves> GLOVES = ITEMS.register("gloves",
-            ()->new Gloves(new Gloves.Properties()
+            ()->new Gloves(10, new Gloves.Properties()
                     .stacksTo(1)
                     .durability(512)
+            ));
+
+    public static final DeferredItem<Gloves> NETHERITE_GLOVES = ITEMS.register("netherite_gloves",
+            ()->new Gloves(15, new Gloves.Properties()
+                    .stacksTo(1)
+                    .durability(4096)
             ));
 
     public static void register(IEventBus eventBus){

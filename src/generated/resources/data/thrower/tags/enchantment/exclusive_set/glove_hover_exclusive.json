@@ -1,0 +1,12 @@
+{
+  "values": [
+    {
+      "id": "thrower:throwself",
+      "required": false
+    },
+    {
+      "id": "thrower:hover",
+      "required": false
+    }
+  ]
+}

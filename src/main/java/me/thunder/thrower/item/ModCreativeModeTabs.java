@@ -24,6 +24,7 @@ public class ModCreativeModeTabs {
                     .displayItems((itemDisplayParameters, output) -> {
                         output.accept(ModItems.MOB_NET);
                         output.accept(ModItems.GLOVES);
+                        output.accept(ModItems.NETHERITE_GLOVES);
 
                         //enchanted book
                         getEnchantedBook(itemDisplayParameters,output, ModEnchantments.BOOMERANG);

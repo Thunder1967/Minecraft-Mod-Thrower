@@ -1,11 +1,14 @@
 package me.thunder.thrower.datagen;
 
 import me.thunder.thrower.Thrower;
+import me.thunder.thrower.enchantment.ModEnchantments;
 import me.thunder.thrower.item.ModItems;
 import me.thunder.thrower.util.ModTags;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.tags.ItemTagsProvider;
+import net.minecraft.tags.EnchantmentTags;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
 import net.neoforged.neoforge.common.Tags;
@@ -35,10 +38,13 @@ public class ModItemTagProvider extends ItemTagsProvider {
 //                .add(Items.TRIDENT);
 
         this.tag(ModTags.Items.GLOVES_ENCHANTABLE)
-                .add(ModItems.GLOVES.get());
+                .add(ModItems.GLOVES.get())
+                .add(ModItems.NETHERITE_GLOVES.get());
 
         this.tag(ModTags.Items.QUICKTHROW_ENCHANTABLE)
                 .addTags(ModTags.Items.GLOVES_ENCHANTABLE)
                 .add(Items.TRIDENT);
+        this.tag(ItemTags.DURABILITY_ENCHANTABLE)
+                .addTags(ModTags.Items.GLOVES_ENCHANTABLE);
     }
 }

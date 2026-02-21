@@ -1,0 +1,8 @@
+{
+  "values": [
+    {
+      "id": "thrower:lowgravity",
+      "required": false
+    }
+  ]
+}

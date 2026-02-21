@@ -9,6 +9,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.Entity;
@@ -24,14 +25,21 @@ public class Gloves extends Item {
     public enum GlovesState{
         DEFAULT,CHARGED_THROW,THROW_SELF,AUTO_THROW,HOVER_SHOOT
     }
+    private final int enchantability;
 
-    public Gloves(Properties properties) {
+    public Gloves(int enchantability, Properties properties) {
         super(properties);
+        this.enchantability = enchantability;
     }
 
     @Override
     public boolean isValidRepairItem(ItemStack pStack, ItemStack pRepairCandidate) {
         return pRepairCandidate.is(Items.LEATHER) || super.isValidRepairItem(pStack, pRepairCandidate);
+    }
+
+    @Override
+    public int getEnchantmentValue() {
+        return enchantability;
     }
 
     @Override
@@ -187,7 +195,7 @@ public class Gloves extends Item {
         Vec3 lookAngle = player.getLookAngle();
         var lookup = player.registryAccess().lookupOrThrow(Registries.ENCHANTMENT);
         int muscleLevel = gloves.getEnchantmentLevel(lookup.getOrThrow(ModEnchantments.MUSCLE));
-        double speed = (0.4+duration*0.04)*(1+muscleLevel*0.1);
+        double speed = (0.4+ Mth.clamp(duration,0,20)*0.04)*(1+muscleLevel*0.1);
         return lookAngle.scale(speed).add(player.getDeltaMovement());
     }
 

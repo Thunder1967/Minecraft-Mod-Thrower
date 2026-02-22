@@ -1,6 +1,5 @@
 package me.thunder.thrower.datagen;
 
-import com.google.gson.JsonObject;
 import me.thunder.thrower.Thrower;
 import me.thunder.thrower.item.ModItems;
 import net.minecraft.data.PackOutput;

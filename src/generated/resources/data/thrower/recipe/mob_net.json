@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "B": {
+      "item": "minecraft:slime_ball"
+    },
+    "C": {
+      "tag": "minecraft:stone_tool_materials"
+    },
+    "S": {
+      "item": "minecraft:string"
+    }
+  },
+  "pattern": [
+    "CSC",
+    "SBS",
+    "CSC"
+  ],
+  "result": {
+    "count": 1,
+    "id": "thrower:mob_net"
+  }
+}

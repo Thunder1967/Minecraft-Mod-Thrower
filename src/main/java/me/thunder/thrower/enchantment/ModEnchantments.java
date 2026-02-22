@@ -22,7 +22,7 @@ public class ModEnchantments {
     public static void bootstrap(BootstrapContext<Enchantment> context) {
         HolderGetter<Item> itemRegistry = context.lookup(Registries.ITEM);
         var enchantments = context.lookup(Registries.ENCHANTMENT);
-
+        //define enchantment
         register(context, MUSCLE,Enchantment.enchantment(Enchantment.definition(
             itemRegistry.getOrThrow(ModTags.Items.GLOVES_ENCHANTABLE),
             itemRegistry.getOrThrow(ModTags.Items.GLOVES_ENCHANTABLE),

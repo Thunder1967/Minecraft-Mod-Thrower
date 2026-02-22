@@ -35,7 +35,17 @@ public class FlyingTool extends GlovesCanReturnProjectile {
         super(ModEntities.FLYING_TOOL.get(), livingEntity, level, item, gloves);
         this.gloves = gloves;
         if(livingEntity instanceof Player player){
+            // basic cooldown
             player.getCooldowns().addCooldown(gloves.getItem(), 10);
+        }
+    }
+
+    @Override
+    protected void onHitEntity(EntityHitResult result) {
+        super.onHitEntity(result);
+        if(this.getOwner() instanceof Player player && this.gloves!=null){
+            // hit entity cooldown
+            player.getCooldowns().addCooldown(this.gloves.getItem(), getThrowCoolDown());
         }
     }
 
@@ -50,6 +60,7 @@ public class FlyingTool extends GlovesCanReturnProjectile {
             Player player = this.getOwner() instanceof Player p ? p : null;
 
             if (tool.isCorrectToolForDrops(state)) {
+                // use correct tool break block
                 LootParams.Builder builder = new LootParams.Builder(serverLevel)
                         .withParameter(LootContextParams.ORIGIN, Vec3.atCenterOf(pos))
                         .withParameter(LootContextParams.TOOL, tool)
@@ -71,14 +82,6 @@ public class FlyingTool extends GlovesCanReturnProjectile {
                 // launch block breaking effect
                 serverLevel.levelEvent(2001, pos, Block.getId(state));
             }
-        }
-    }
-
-    @Override
-    protected void onHitEntity(EntityHitResult result) {
-        super.onHitEntity(result);
-        if(this.getOwner() instanceof Player player && this.gloves!=null){
-            player.getCooldowns().addCooldown(this.gloves.getItem(), getThrowCoolDown());
         }
     }
 

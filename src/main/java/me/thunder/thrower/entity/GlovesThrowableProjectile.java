@@ -23,6 +23,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.*;
@@ -85,6 +86,7 @@ public abstract class GlovesThrowableProjectile extends Projectile implements It
             LowGravityLevel.set(this,gloves.getEnchantmentLevel(lookup.getOrThrow(ModEnchantments.LOWGRAVITY)));
             MuscleLevel.set(this,gloves.getEnchantmentLevel(lookup.getOrThrow(ModEnchantments.MUSCLE)));
             if(gloves.getEnchantmentLevel(lookup.getOrThrow(ModEnchantments.HOVER))>0){
+                // handle hover enchantment
                 int hoverCounter = player.getData(ModDataAttachments.HOVER_PROJECTILE_DASH_TRIGGER)+1;
                 player.setData(ModDataAttachments.HOVER_PROJECTILE_DASH_TRIGGER,hoverCounter);
                 HoverID.set(this, hoverCounter);
@@ -102,17 +104,16 @@ public abstract class GlovesThrowableProjectile extends Projectile implements It
         super.tick();
         this.updateRotation();
 
-        // hover
         int hoverID = HoverID.get(this);
         if(hoverID!=-1){
-            // hover
+            // handle hover enchantment
             int ownerCnt = this.getOwner().getData(ModDataAttachments.HOVER_PROJECTILE_DASH_TRIGGER);
 
             if(ownerCnt>=hoverID){
                 // keep hover
                 Vec3 newPos = getHoverNextPos(this.getOwner().getBoundingBox().getCenter(), hoverID,ownerCnt,1.5f,this.tickCount*0.1f);
                 this.setPos(newPos);
-
+                // set velocity (this will affect FlyingTool's direction)
                 Vec3 moveVec = getTargetLocation(this.getOwner(),32).subtract(this.position());
                 moveVec = moveVec.scale(0.1+MuscleLevel.get(this)*0.02);
                 this.setDeltaMovement(moveVec);
@@ -132,20 +133,25 @@ public abstract class GlovesThrowableProjectile extends Projectile implements It
                     this.setPos(this.position().add(bodyVec));
                 }
 
+                // leave "Hover" state
                 HoverID.set(this,-1);
             }
         }
         else {
+            // normal action
             if(!this.noPhysics){
+                // handle hit event
                 HitResult hitresult = ProjectileUtil.getHitResultOnMoveVector(this, this::canHitEntity);
                 if (hitresult.getType() != HitResult.Type.MISS && !EventHooks.onProjectileImpact(this, hitresult)) {
                     this.hitTargetOrDeflectSelf(hitresult);
                 }
+
                 this.checkInsideBlocks();
                 this.checkInGround();
             }
 
             if(!InGround.get(this) || this.noPhysics){
+                // handle actual move
                 simpleMove();
                 this.applyDrag(0.99);
                 this.applyGravity();
@@ -179,7 +185,9 @@ public abstract class GlovesThrowableProjectile extends Projectile implements It
         super.onHitEntity(result);
         Vec3 curMotion = this.getDeltaMovement();
         double curSpeed = curMotion.length();
+        // handle damage
         if (!this.level().isClientSide && curSpeed>0.3) {projectileHurt(result);}
+        // reflect after hit other entity
         Vec3 reflect = this.position().subtract(result.getEntity().position()).normalize()
                 .scale(curSpeed);
         this.setDeltaMovement(curMotion.add(reflect).scale(0.2));
@@ -251,21 +259,27 @@ public abstract class GlovesThrowableProjectile extends Projectile implements It
 
     @Override
     public boolean isPushable() {
-        // Preventing being pushed by other entities
-        return this.noPhysics || this.isNoGravity();
+        return false;
     }
 
     @Override
     public boolean isPushedByFluid(FluidType type) {
+        return false;
+    }
+
+    @Override
+    public boolean ignoreExplosion(Explosion explosion) {
         return this.noPhysics || this.isNoGravity();
     }
 
     protected void simpleMove(){
+        // simple move logic
         Vec3 vec3 = this.getDeltaMovement();
 
         double d0 = this.getX() + vec3.x;
         double d1 = this.getY() + vec3.y;
         double d2 = this.getZ() + vec3.z;
+        // generate bubble in water
         if (this.isInWater()) {
             for (int i = 0; i < 4; ++i) {
                 double f1 = 0.25;
@@ -297,6 +311,7 @@ public abstract class GlovesThrowableProjectile extends Projectile implements It
     }
 
     private boolean willHitPlayer() {
+        // check whether projectile hits or is too close to player
         if(this.distanceToSqr(this.getOwner())<9) return true;
         Vec3 startPos = this.position();
         Vec3 velocity = this.getDeltaMovement();
@@ -350,6 +365,11 @@ public abstract class GlovesThrowableProjectile extends Projectile implements It
     }
 
     protected Vec3 getHoverNextPos(Vec3 curPos, int i, int n, float r, float time){
+        // use Fibonacci Sphere Sampling
+        // choose two sample points v1 and v2
+        // get v3 from v1 cross v2
+        // With v2 as the axis and v1,v3 as the coordinate systems
+        // use polar coordinates on v1,v3 and calculate next position with time
         n*=2;
         int i1 = 2*i-1;
         int i2 = 2*i;
@@ -371,6 +391,7 @@ public abstract class GlovesThrowableProjectile extends Projectile implements It
     }
 
     public Vec3 getTargetLocation(Entity player, double range) {
+        // calculate the block/entity that the crosshair is pointing at
         Vec3 eyePos = player.getEyePosition();
         Vec3 viewVec = player.getViewVector(1.0F);
         Vec3 reachVec = eyePos.add(viewVec.scale(range));

@@ -72,7 +72,7 @@ public class MobNetEntity extends GlovesThrowableProjectile {
                                 .append(" ")
                                 .append(living.getDisplayName()));
 
-                // gnerater drop
+                // generate drop
                 this.spawnAtLocation(droppedNet);
                 living.discard();
             }

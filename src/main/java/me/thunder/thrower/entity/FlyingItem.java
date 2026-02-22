@@ -25,6 +25,7 @@ public class FlyingItem extends GlovesThrowableProjectile {
         if(this.level().isClientSide || this.CanPickUp.get(this)) return;
         ItemStack itemStack = this.getItem();
         Item item = itemStack.getItem();
+        // special custom item
         if (item instanceof SpawnEggItem eggItem){
             EntityType<?> type = eggItem.getType(itemStack);
             Entity entity =type.create(this.level());

@@ -54,7 +54,7 @@ public abstract class GlovesCanReturnProjectile extends GlovesThrowableProjectil
             Vec3 direction = ownerPos.subtract(thisPos).normalize();
 
             // go back with acceleration
-            double speed = Math.min(-1+(BoomerangLevel.get(this)*2),(returnTimer * 0.1));
+            double speed = Math.min(-1+(BoomerangLevel.get(this)*2),(returnTimer * 0.2));
             this.setDeltaMovement(direction.scale(speed*0.6).add(this.getDeltaMovement().scale(0.4)));
             returnTimer++;
         }

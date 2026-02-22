@@ -15,6 +15,11 @@ repositories {
         name = "Gegy"
         url = uri("https://maven.gegy.dev")
     }
+    maven {
+        // location of the maven that hosts JEI files since January 2023
+        name = "Jared's maven"
+        url = "https://maven.blamejared.com/"
+    }
 }
 
 base {
@@ -103,10 +108,18 @@ sourceSets.main.resources { srcDir 'src/generated/resources' }
 
 def mappingsAttribute = Attribute.of("net.minecraft.mappings", String)
 dependencies {
+    //other
     runtimeOnly "maven.modrinth:jade:15.10.4+neoforge"
     runtimeOnly "maven.modrinth:damagenumbers:1.4.1-neoforge"
 //    runtimeOnly "maven.modrinth:just-zoom:2.1.0-1.21.1-neoforge"
     runtimeOnly "maven.modrinth:konkrete:1.9.9-1.21-neoforge"
+    runtimeOnly "maven.modrinth:konkrete:1.9.9-1.21-neoforge"
+
+    //JEI
+    // compile against the JEI API but do not include it at runtime
+    compileOnly("mezz.jei:jei-${parchment_minecraft_version}-neoforge-api:${jei_version}")
+    // at runtime, use the full JEI jar for NeoForge
+    runtimeOnly("mezz.jei:jei-${parchment_minecraft_version}-neoforge:${jei_version}")
 
     // LambDynamicLights
     attributesSchema {

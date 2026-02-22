@@ -53,13 +53,18 @@ public class Gloves extends Item {
         InteractionHand otherHand = (curHand == InteractionHand.MAIN_HAND) ? InteractionHand.OFF_HAND : InteractionHand.MAIN_HAND;
         ItemStack otherItem = player.getItemInHand(otherHand);
         var lookup = player.registryAccess().lookupOrThrow(Registries.ENCHANTMENT);
+
         if(!player.getCooldowns().isOnCooldown(curItem.getItem())) {
+            // gloves are not in cooldown
             if (otherItem.isEmpty()) {
+                // throw with the other hand empty
                 if(curItem.getEnchantmentLevel(lookup.getOrThrow(ModEnchantments.THROWSELF))>0){
+                    // charge and throw self
                     setState(curItem,GlovesState.THROW_SELF);
                     player.startUsingItem(curHand);
                 }
                 else if(curItem.getEnchantmentLevel(lookup.getOrThrow(ModEnchantments.HOVER))>0 && player.getData(ModDataAttachments.HOVER_PROJECTILE_DASH_TRIGGER)>0){
+                    // charge and shoot hover projectile
                     setState(curItem,GlovesState.HOVER_SHOOT);
                     player.startUsingItem(curHand);
                 }
@@ -68,7 +73,9 @@ public class Gloves extends Item {
                 }
             }
             else{
+                // throw with the other hand not empty
                 if(curItem.getEnchantmentLevel(lookup.getOrThrow(ModEnchantments.HOVER))>0){
+                    // can auto(without charge) to add hover projectile
                     setState(curItem,GlovesState.AUTO_THROW);
                     if(!handleThrow(player, level, otherItem, curItem, 0)){
                         return InteractionResultHolder.fail(curItem);
@@ -76,6 +83,7 @@ public class Gloves extends Item {
                     else player.swing(curHand);
                 }
                 else{
+                    // throw normal item
                     setState(curItem,GlovesState.CHARGED_THROW);
                     player.startUsingItem(curHand);
                 }
@@ -101,6 +109,7 @@ public class Gloves extends Item {
             InteractionHand otherHand = (curHand == InteractionHand.MAIN_HAND) ? InteractionHand.OFF_HAND : InteractionHand.MAIN_HAND;
             ItemStack otherItem = player.getItemInHand(otherHand);
             int duration = this.getUseDuration(stack, player) - timeLeft;
+
             switch (getState(curItem)){
                 case THROW_SELF -> throwSelf(level, player, curItem, duration);
                 case HOVER_SHOOT -> hoverShoot(player, duration);
@@ -110,6 +119,7 @@ public class Gloves extends Item {
                     }
                 }
             }
+            // if the action is successful, swing hand
             player.swing(otherHand);
         }
     }

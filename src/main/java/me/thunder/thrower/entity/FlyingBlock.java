@@ -18,7 +18,6 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
@@ -111,6 +110,7 @@ public class FlyingBlock extends GlovesThrowableProjectile {
         if(owner!=null){
             source = this.damageSources().fallingBlock(owner);
             if(this.getItem().is(ItemTags.ANVIL)){
+                // handle ANVIL damage
                 source = this.damageSources().anvil(owner);
                 baseDamage = 2;
                 speedMultipler = 4;
@@ -119,6 +119,7 @@ public class FlyingBlock extends GlovesThrowableProjectile {
                         SoundEvents.ANVIL_LAND, SoundSource.PLAYERS, 1.0F, 1.0F);
             }
             else{
+                // handle other block
                 SoundType soundType = this.getBlockState().getSoundType();
                 this.level().playSound(null, this.getX(), this.getY(), this.getZ(),
                         soundType.getPlaceSound(),

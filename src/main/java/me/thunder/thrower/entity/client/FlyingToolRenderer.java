@@ -25,7 +25,7 @@ public class FlyingToolRenderer extends EntityRenderer<GlovesCanReturnProjectile
     @Override
     public void render(GlovesCanReturnProjectile entity, float yaw, float partialTicks, PoseStack poseStack, MultiBufferSource buffer, int packedLight) {
         poseStack.pushPose();
-        // 轉正角度
+        // correct shape
         Vec3 motion = entity.getDeltaMovement();
         float correctY = (float) (Mth.atan2(motion.z, motion.x) * (180 / Math.PI))-180f;
         poseStack.mulPose(Axis.YP.rotationDegrees(-correctY));
@@ -60,6 +60,7 @@ public class FlyingToolRenderer extends EntityRenderer<GlovesCanReturnProjectile
                 rotationAngle = (float) -Math.toDegrees(radians)-60f;
             }
         }
+        //actually change display
         poseStack.mulPose(new Quaternionf().rotateAxis(
                 (float)Math.toRadians(rotationAngle), (float) rotationAxis.x,(float) rotationAxis.y,(float) rotationAxis.z
         ));

@@ -12,6 +12,3 @@ With the specialized "Combat Gauntlets," you are no longer bound by tradition. W
 在這個模組中你可以使用"手套"來投擲所有Minecraft原版物品。
 - 有些物品有特殊的擊中效果(如: TNT->落地爆炸)
 - 手套專屬附魔
-
-#### 作者的話
-這是我的第一個模組，同時也是 JAVA 專案練習、物件導向設計練習。
